@@ -3,52 +3,71 @@ var express = require('express')
   , https = require('https')
   , http = require('http')
   , url = require('url')
-  , fs = require('fs')
-  , util = require('util')
-  , path = require('path')
+  //, path = require('path')
+
+  , utils = require('./utils')
+  //, AccessCard = require('./access_card')
   ;
 
-// Need to receive this from Drupal
+
+// Need to receive this from Drupal///////////////////////
 var DrupalHost = 'http://109.104.174.224:8082';
+var debug = 0;
+var logFile = 'D:/node.log';
+var port = 8081;
+/////////////////////////////////////////////////////////
 
-Object.defineProperty(global, '__stack', {
-  get: function() {
-    var orig = Error.prepareStackTrace;
-    Error.prepareStackTrace = function(_, stack){ return stack; };
-    var err = new Error;
-    Error.captureStackTrace(err, arguments.callee);
-    var stack = err.stack;
-    Error.prepareStackTrace = orig;
-    return stack;
-  }
-});
+//var card = new AccessCard({ salt: 'asd' });
+//log(a = card.create(a));
+//log(card.validate(a));
 
-Object.defineProperty(global, '__line', {
-  get: function(){
-    return __stack[2].getLineNumber();
-  }
-});
 
-Object.defineProperty(global, '__file', {
-  get: function(){
-    return __stack[1].getFileName();
-  }
-});
-
-function typeOf(target) {
-  return Object.prototype.toString.call(target).slice(8, -1);
+if (debug) {
+  var Logger = require('./logger');
+  var logger = new Logger();
+  var log = function(message) {
+    logger.log(message);
+  };
+}
+else {
+  log = function() {};
 }
 
-function log(message) {
-  var logFile = 'D:/node.log';
-  var date = new Date().toISOString();
-  var file = path.basename(__file);
-  if (0 <= ['Array', 'Object'].indexOf(typeOf(message))) {
-    message = util.inspect(message);
+
+function getHeaders(type) {
+  type = type || 'json';
+
+  var headers = {
+    'Access-Control-Allow-Origin': DrupalHost
+  };
+  switch (type) {
+    case 'json':
+      headers['Content-Type'] = 'text/json; charset=utf-8';
+      break;
+
+    case 'html':
+      headers['Content-Type'] = 'text/html; charset=utf-8';
+      break;
   }
-  message = '>>>> ' + date + ' ' + file + ':' + __line + '>\n' + message + '\n';
-  fs.appendFile(logFile, message);
-  console.log(message);
+
+  return headers;
+}
+
+
+function validateHost(host) {
+  var response;
+
+  if (DrupalHost !== host) {
+    response = {
+      code: 403,
+      headers: getHeaders('html')
+    };
+  }
+  else {
+    response = true;
+  }
+
+  return response;
 }
 
 
@@ -56,27 +75,39 @@ var app = express();
 
 app.use(express.bodyParser());
 
-app.get('/test', function(req, res) {
+app.get('/ping', function(req, res) {
+  log('GET /' + req.url);
   log(req.headers);
-  log(req.url);
-  log('GET /');
+
+  var validation = validateHost(req.headers.origin);
+  if (true === validation) {
+    res.writeHead(200, getHeaders());
+    response = JSON.stringify({ status: 'OK' });
+  }
+  else {
+    res.writeHead(validation.code, validation.headers);
+  }
+
+  res.end(response);
+});
+
+app.get('/test', function(req, res) {
+  log('GET /' + req.url);
+  log(req.headers);
+
   var url_parts = url.parse(req.url, true);
   var query = url_parts.query;
 
+  var validation = validateHost(req.headers.origin);
   if ('hub.challenge' in query && 'hub.mode' in query && 'subscribe' === query['hub.mode']) {
     var response = query['hub.challenge'];
   }
-  else if (DrupalHost === req.headers.origin) {
-    res.writeHead(200, {
-      'Content-Type': 'text/html; charset=utf-8',
-      'Access-Control-Allow-Origin': DrupalHost
-    });
+  else if (true === validation) {
+    res.writeHead(200, getHeaders('html'));
     response = 'test';
   }
   else {
-    res.writeHead(403, {
-      'Content-Type': 'text/html; charset=utf-8'
-    });
+    res.writeHead(validation.code, validation.headers);
   }
 
   res.end(response);
@@ -92,7 +123,7 @@ app.post('/test', function(req, res) {
   res.end('thanks!');
 });
 
-app.listen(8081);
+app.listen(port);
 
 
 

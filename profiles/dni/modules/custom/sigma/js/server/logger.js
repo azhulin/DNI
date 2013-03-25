@@ -1,5 +1,9 @@
-var path = require('path')
-;
+var fs = require('fs')
+  , util = require('util')
+  , path = require('path')
+
+  , utils = require('./utils')
+  ;
 
 
 Object.defineProperty(global, '__stack', {
@@ -15,12 +19,12 @@ Object.defineProperty(global, '__stack', {
 });
 
 
-
 Object.defineProperty(global, '__line', {
   get: function(){
     return __stack[2].getLineNumber();
   }
 });
+
 
 Object.defineProperty(global, '__file', {
   get: function(){
@@ -28,23 +32,22 @@ Object.defineProperty(global, '__file', {
   }
 });
 
-function typeOf(target) {
-  return Object.prototype.toString.call(target).slice(8, -1);
+
+module.exports = Logger;
+
+
+function Logger(file) {
+  this.file = file || 'D:/node.log';
 }
 
 
-
-function log(message) {
-  //var logFile = 'D:/node.log';
+Logger.prototype.log = function(message) {
   var date = new Date().toISOString();
   var file = path.basename(__file);
-  if (0 <= ['Array', 'Object'].indexOf(typeOf(message))) {
+  if (0 <= ['Array', 'Object'].indexOf(utils.typeOf(message))) {
     message = util.inspect(message);
   }
   message = '>>>> ' + date + ' ' + file + ':' + __line + '>\n' + message + '\n';
-  //fs.appendFile(logFile, message);
+  fs.appendFile(this.file, message);
   console.log(message);
-}
-
-
-log('asd');
+};

@@ -2,6 +2,14 @@
 
 
 /**
+ * Implements hook_init().
+ */
+function sigma_init() {
+  require_once 'includes/Sigma.class.php';
+}
+
+
+/**
  * Implements hook_menu().
  */
 function sigma_menu() {
@@ -15,17 +23,31 @@ function sigma_menu() {
     'access callback' => 'user_access',
     'access arguments' => array('administer sigma instagram'),
     'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/sigma.admin.inc',
   );
 
   $items['admin/config/services/sigma/node-server'] = array(
-    'title' => 'Node.js Server',
-    'description' => t('Node.js server settings.'),
+    'title' => 'Node Server',
+    'description' => t('Node server settings.'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('sigma_node_server_form'),
     'access callback' => 'user_access',
     'access arguments' => array('administer sigma instagram'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
+    'file' => 'includes/sigma.admin.inc',
     'weight' => 0,
+  );
+
+  $items['admin/config/services/sigma/settings'] = array(
+    'title' => 'Instagram',
+    'description' => t('Instagram settings form.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sigma_settings_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer sigma instagram'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/sigma.admin.inc',
+    'weight' => 1,
   );
 
   //$items['admin/config/services/sigma/...'] = array(
@@ -36,7 +58,7 @@ function sigma_menu() {
   //  'access callback' => 'user_access',
   //  'access arguments' => array('administer sigma instagram'),
   //  'type' => MENU_LOCAL_TASK,
-  //  'weight' => 1,
+  //  'weight' => 2,
   //);
 
   return $items;
@@ -56,32 +78,3 @@ function sigma_permission() {
 
   return $permissions;
 }
-
-
-/**
- * Form constructor for Node.js server settings form.
- */
-function sigma_node_server_form() {
-  $form = array();
-
-  $form['server_status'] = array(
-    '#type' => 'item',
-    '#title' => 'Server status',
-    '#markup' => 'Loading...',
-  );
-
-  return $form;
-}
-
-/*
-jQuery.ajax({
-  url: 'http://109.104.174.224:8081/test',
-  method: 'GET',
-  success: function(data) {
-    console.log(data);
-  },
-  error: function() {
-    console.warn('Error occured.');
-  }
-});
-*/

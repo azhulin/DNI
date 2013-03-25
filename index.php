@@ -26,18 +26,7 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
   @file_put_contents('D:/log.txt', date('m-d-y H:i:s') . ' ' . basename(__FILE__) . ':' . __LINE__ . ">\n" . print_r($response, 1) . "\n", FILE_APPEND); */
 
 
-/*$command = 'node C:/wamp/www/profiles/dni/modules/custom/sigma/js/node/server.node.js';
-function exec_bg($command) {
-  if (0 === strpos(php_uname(), 'Windows')) {
-    pclose(popen('start /B ' . $command, 'r'));
-  }
-  else {
-    exec($command . ' > /dev/null &') ;
-  }
-}
-exec_bg($command);
-@file_put_contents('D:/log.txt', date('m-d-y H:i:s') . ' ' . basename(__FILE__) . ':' . __LINE__ . ">\n" . print_r('Done', 1) . "\n", FILE_APPEND);
-*/
+
 
 
 menu_execute_active_handler();

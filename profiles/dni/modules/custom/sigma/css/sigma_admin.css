@@ -1,0 +1,32 @@
+#edit-status,
+#edit-node-start,
+#edit-node-stop {
+  display: none;
+}
+
+#edit-status label {
+  display: inline;
+  margin-right: 16px;
+}
+
+.server-status {
+  border-radius: 16px;
+  color: #FFF;
+  font-weight: bold;
+  padding: 4px 12px;
+  text-transform: uppercase;
+}
+
+.server-status.server-status-checking {
+  background-color: #999;
+}
+
+.server-status.server-status-off {
+  background-color: #A00;
+  display: none;
+}
+
+.server-status.server-status-on {
+  background-color: #0A0;
+  display: none;
+}
