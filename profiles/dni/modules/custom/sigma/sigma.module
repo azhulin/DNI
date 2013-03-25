@@ -1,0 +1,87 @@
+<?php
+
+
+/**
+ * Implements hook_menu().
+ */
+function sigma_menu() {
+  $items = array();
+
+  $items['admin/config/services/sigma'] = array(
+    'title' => 'Sigma Instagram',
+    'description' => t('Sigma Instagram settings.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sigma_node_server_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer sigma instagram'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  $items['admin/config/services/sigma/node-server'] = array(
+    'title' => 'Node.js Server',
+    'description' => t('Node.js server settings.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sigma_node_server_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer sigma instagram'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
+  );
+
+  //$items['admin/config/services/sigma/...'] = array(
+  //  'title' => '...',
+  //  'description' => t('...'),
+  //  'page callback' => 'drupal_get_form',
+  //  'page arguments' => array('...'),
+  //  'access callback' => 'user_access',
+  //  'access arguments' => array('administer sigma instagram'),
+  //  'type' => MENU_LOCAL_TASK,
+  //  'weight' => 1,
+  //);
+
+  return $items;
+}
+
+
+/**
+ * Implements hook_permission().
+ */
+function sigma_permission() {
+  $permissions = array();
+
+  $permissions['administer sigma instagram'] = array(
+    'title' => t('Administer Sigma Instagram'),
+    'description' => t('Perform administration tasks for Sigma Instagram.'),
+  );
+
+  return $permissions;
+}
+
+
+/**
+ * Form constructor for Node.js server settings form.
+ */
+function sigma_node_server_form() {
+  $form = array();
+
+  $form['server_status'] = array(
+    '#type' => 'item',
+    '#title' => 'Server status',
+    '#markup' => 'Loading...',
+  );
+
+  return $form;
+}
+
+/*
+jQuery.ajax({
+  url: 'http://109.104.174.224:8081/test',
+  method: 'GET',
+  success: function(data) {
+    console.log(data);
+  },
+  error: function() {
+    console.warn('Error occured.');
+  }
+});
+*/

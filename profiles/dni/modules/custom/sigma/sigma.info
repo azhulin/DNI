@@ -1,0 +1,5 @@
+name = Sigma
+description = Instagram Drupal integration using Node.js server.
+core = "7.x"
+package = "Sigma"
+configure = admin/config/services/sigma
