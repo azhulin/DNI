@@ -49,3 +49,5 @@ dependencies[] = views_content
 ; Panels
 dependencies[] = panels
 dependencies[] = panels_mini
+; Sigma
+dependencies[] = sigma
