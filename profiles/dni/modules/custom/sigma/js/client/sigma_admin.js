@@ -1,29 +1,64 @@
 (function($) {
 
-  $(function() {
-    var sigma = new Sigma();
-    if (!('host' in sigma)) {
-      sigma = null;
-    }
+  function AdminController() {
+    this.el = {
+      status: $('#edit-status'),
+      start: $('#edit-node-start'),
+      stop: $('#edit-node-stop')
+    };
+  }
 
-    var $status = $('#edit-status');
-    var $start = $('#edit-node-start');
-    var $stop = $('#edit-node-stop');
-    if (sigma && $status.length) {
-      $('#edit-status').show();
-      sigma.ping(
-        function() {
-          $('.server-status', $status).hide();
-          $('.server-status.server-status-on', $status).show();
-          $stop.show();
-        },
-        function() {
-          $('.server-status', $status).hide();
-          $('.server-status.server-status-off', $status).show();
-          $start.show();
-        }
-      );
+
+  AdminController.prototype.init = function() {
+    this.sigma = new Sigma();
+    'host' in this.sigma && this.start();
+  };
+
+
+  AdminController.prototype.start = function() {
+    if (this.el.status.length) {
+      this.el.status.show();
+      this.checkStatus();
     }
+  };
+
+
+  AdminController.prototype.checkStatus = function() {
+    var self = this;
+    this.sigma.ping(
+      function() {
+        self.isOnline();
+      },
+      function() {
+        self.isOffline();
+      }
+    );
+  };
+
+
+  AdminController.prototype.isOnline = function() {
+    var self = this;
+    $('.server-status', this.el.status).hide();
+    $('.server-status.server-status-on', this.el.status).show();
+    this.el.stop.unbind().click(function() {
+       self.sigma.exit(null, null, function() {
+         self.checkStatus();
+       });
+       return false;
+    }).show();
+  };
+
+
+  AdminController.prototype.isOffline = function() {
+    $('.server-status', this.el.status).hide();
+    $('.server-status.server-status-off', this.el.status).show();
+    this.el.stop.hide();
+    this.el.start.show();
+  };
+
+
+  $(function() {
+    new AdminController().init();
   });
 
 })(jQuery);

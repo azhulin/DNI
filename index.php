@@ -17,16 +17,11 @@ define('DRUPAL_ROOT', getcwd());
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
 drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
-
 /* $response = drupal_http_request(/* 'http://dni-node.no-ip.org/test' *'http://109.104.174.224:8081/test', array(
   'method' => 'POST',
   'data' => http_build_query(array('test' => 'test')), // see comments below - you may need to change this
   'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
   ));
   @file_put_contents('D:/log.txt', date('m-d-y H:i:s') . ' ' . basename(__FILE__) . ':' . __LINE__ . ">\n" . print_r($response, 1) . "\n", FILE_APPEND); */
-
-
-
-
 
 menu_execute_active_handler();

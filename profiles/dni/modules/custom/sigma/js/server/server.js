@@ -1,30 +1,34 @@
 var express = require('express')
-  , querystring = require('querystring')
-  , https = require('https')
+  //, querystring = require('querystring')
+  //, https = require('https')
   , http = require('http')
   , url = require('url')
   //, path = require('path')
 
-  , utils = require('./utils')
+  , settings = require('./settings')
+  //, utils = require('./utils')
   //, AccessCard = require('./access_card')
   ;
 
+/*settings = {
+  port: '8081',
+  drupal_url: 'http://109.104.174.224:8082',
+  debug: 1,
+  log_file: 'D:\\node.log'
+};*/
 
-// Need to receive this from Drupal///////////////////////
-var DrupalHost = 'http://109.104.174.224:8082';
-var debug = 0;
-var logFile = 'D:/node.log';
-var port = 8081;
-/////////////////////////////////////////////////////////
+
+
+
 
 //var card = new AccessCard({ salt: 'asd' });
 //log(a = card.create(a));
 //log(card.validate(a));
 
 
-if (debug) {
+if (settings.debug) {
   var Logger = require('./logger');
-  var logger = new Logger();
+  var logger = new Logger(settings.log_file);
   var log = function(message) {
     logger.log(message);
   };
@@ -33,12 +37,13 @@ else {
   log = function() {};
 }
 
+log(settings);
 
 function getHeaders(type) {
   type = type || 'json';
 
   var headers = {
-    'Access-Control-Allow-Origin': DrupalHost
+    'Access-Control-Allow-Origin': settings.drupal_url
   };
   switch (type) {
     case 'json':
@@ -57,7 +62,7 @@ function getHeaders(type) {
 function validateHost(host) {
   var response;
 
-  if (DrupalHost !== host) {
+  if (settings.drupal_url !== host) {
     response = {
       code: 403,
       headers: getHeaders('html')
@@ -91,7 +96,7 @@ app.get('/ping', function(req, res) {
   res.end(response);
 });
 
-app.get('/test', function(req, res) {
+/*app.get('/test', function(req, res) {
   log('GET /' + req.url);
   log(req.headers);
 
@@ -111,9 +116,9 @@ app.get('/test', function(req, res) {
   }
 
   res.end(response);
-});
+});*/
 
-app.post('/test', function(req, res) {
+/*app.post('/test', function(req, res) {
   //log('POST /');
   //log(req.body);
   res.writeHead(200, {
@@ -121,18 +126,31 @@ app.post('/test', function(req, res) {
   });
 
   res.end('thanks!');
-});
-
-app.listen(port);
-
-
+});*/
 
 app.get('/exit', function(req, res) {
-  log('Before exit');
-  res.end('Exit');
-  log('Exit');
+  log('GET /' + req.url);
+  log(req.headers);
+
+  var validation = validateHost(req.headers.origin);
+  if (true === validation) {
+    res.writeHead(200, getHeaders());
+    response = JSON.stringify({ status: 'OK' });
+  }
+  else {
+    res.writeHead(validation.code, validation.headers);
+  }
+
+  res.end(response);
   process.exit();
 });
+
+//app.listen(settings.port);
+app.listen(8081);
+
+
+
+
 
 
 /*

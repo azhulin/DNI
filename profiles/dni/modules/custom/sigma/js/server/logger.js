@@ -37,7 +37,7 @@ module.exports = Logger;
 
 
 function Logger(file) {
-  this.file = file || 'D:/node.log';
+  this.file = file;
 }
 
 
