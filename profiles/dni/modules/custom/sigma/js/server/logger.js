@@ -21,14 +21,14 @@ Object.defineProperty(global, '__stack', {
 
 Object.defineProperty(global, '__line', {
   get: function(){
-    return __stack[2].getLineNumber();
+    return __stack[3].getLineNumber();
   }
 });
 
 
 Object.defineProperty(global, '__file', {
   get: function(){
-    return __stack[1].getFileName();
+    return __stack[2].getFileName();
   }
 });
 

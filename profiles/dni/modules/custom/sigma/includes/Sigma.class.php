@@ -71,6 +71,9 @@ class Sigma {
     if (!$this->client_secret) {
       $messages[] = t('Client Secret is not defined.');
     }
+    if (!$this->node_host) {
+      $messages[] = t('Node server host is not defined.');
+    }
     if (!$this->node_port) {
       $messages[] = t('Node server port is not defined.');
     }
@@ -83,6 +86,7 @@ class Sigma {
         'drupal_url=' . $this->drupal_url,
         'client_id=' . $this->client_id,
         'client_secret=' . $this->client_secret,
+        'host=' . $this->node_host,
         'port=' . $this->node_port,
         'access_key=' . $this->access_key,
       );

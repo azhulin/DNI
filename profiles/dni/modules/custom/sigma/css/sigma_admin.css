@@ -1,6 +1,8 @@
 #edit-status,
 #edit-server-start,
-#edit-server-stop {
+#edit-server-stop,
+#edit-subs,
+#edit-subs-new {
   display: none;
 }
 
@@ -12,8 +14,9 @@
 .server-status {
   border-radius: 16px;
   color: #FFF;
+  font-style: italic;
   font-weight: bold;
-  padding: 4px 12px;
+  padding: 4px 14px 4px 10px;
   text-transform: uppercase;
 }
 

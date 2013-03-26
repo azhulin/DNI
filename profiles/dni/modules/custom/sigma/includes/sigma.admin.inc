@@ -77,6 +77,50 @@ function sigma_settings_form() {
     '#value' => t('Save Server Settings'),
   );
 
+  $form['subs'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Subcriptions'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['subs']['subs_list'] = array(
+    '#markup' => sigma_settings_form_subscription_list(),
+  );
+
+  $form['subs']['subs_add'] = array(
+    '#type' => 'button',
+    '#value' => t('Add Subscription'),
+  );
+
+  $form['subs']['subs_new'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('New Subscription'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
+
+  $form['subs']['subs_new']['subs_new_type'] = array(
+    '#type' => 'item',
+    '#title' => t('Subscription type'),
+    '#markup' => t('Tag'),
+  );
+
+  $form['subs']['subs_new']['subs_new_object'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Tag'),
+  );
+
+  $form['subs']['subs_new']['subs_new_create'] = array(
+    '#type' => 'button',
+    '#value' => t('Create'),
+  );
+
+  $form['subs']['subs_new']['subs_new_cancel'] = array(
+    '#type' => 'button',
+    '#value' => t('Cancel'),
+  );
+
   $form['status'] = array(
     '#type' => 'item',
     '#title' => 'Server status',
@@ -91,7 +135,7 @@ function sigma_settings_form() {
   );
 
   $form['server_stop'] = array(
-    '#type' => 'submit',
+    '#type' => 'button',
     '#value' => t('Stop Server'),
   );
 
@@ -100,6 +144,7 @@ function sigma_settings_form() {
   );
 
   $form['#attached']['js'] = array(
+    drupal_get_path('module', 'sigma') . '/js/client/socket.io.min.js',
     drupal_get_path('module', 'sigma') . '/js/client/sigma.js',
     drupal_get_path('module', 'sigma') . '/js/client/sigma_admin.js',
   );
@@ -153,4 +198,26 @@ function sigma_settings_form_submit($form, &$form_state) {
       break;
 
   }
+}
+
+
+/**
+ * Renders subscription list table.
+ */
+function sigma_settings_form_subscription_list() {
+  $vars = array(
+    'header' => array(
+      t('Subscription ID'),
+      t('Type'),
+      t('Tag'),
+      t('Action'),
+    ),
+    'rows' => array(
+      array('', '', '', l(t('Delete'), '', array('attributes' => array('class' => 'button'))))
+    ),
+    'attributes' => array('id' => 'subscription-list'),
+  );
+  $content = theme('table', $vars);
+
+  return $content;
 }
