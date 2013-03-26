@@ -21,8 +21,8 @@ function sigma_uninstall() {
     'sigma_drupal_url',
     'sigma_client_id',
     'sigma_client_secret',
-    'sigma_node_host',
-    'sigma_node_port',
+    'sigma_server_host',
+    'sigma_server_port',
     'sigma_access_key',
   );
 

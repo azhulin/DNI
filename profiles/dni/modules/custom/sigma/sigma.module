@@ -19,18 +19,18 @@ function sigma_menu() {
     'title' => 'Sigma Instagram',
     'description' => t('Sigma Instagram settings.'),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('sigma_node_server_form'),
+    'page arguments' => array('sigma_settings_form'),
     'access callback' => 'user_access',
     'access arguments' => array('administer sigma instagram'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/sigma.admin.inc',
   );
 
-  $items['admin/config/services/sigma/node-server'] = array(
-    'title' => 'Node Server',
-    'description' => t('Node server settings.'),
+  $items['admin/config/services/sigma/settings'] = array(
+    'title' => 'Sigma Instagram Settings',
+    'description' => t('Sigma Instagram settings.'),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('sigma_node_server_form'),
+    'page arguments' => array('sigma_settings_form'),
     'access callback' => 'user_access',
     'access arguments' => array('administer sigma instagram'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
@@ -38,27 +38,16 @@ function sigma_menu() {
     'weight' => 0,
   );
 
-  $items['admin/config/services/sigma/settings'] = array(
-    'title' => 'Instagram',
-    'description' => t('Instagram settings form.'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('sigma_settings_form'),
-    'access callback' => 'user_access',
-    'access arguments' => array('administer sigma instagram'),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'includes/sigma.admin.inc',
-    'weight' => 1,
-  );
-
-  //$items['admin/config/services/sigma/...'] = array(
-  //  'title' => '...',
-  //  'description' => t('...'),
+  //$items['admin/config/services/sigma/settings'] = array(
+  //  'title' => 'Instagram',
+  //  'description' => t('Instagram settings form.'),
   //  'page callback' => 'drupal_get_form',
-  //  'page arguments' => array('...'),
+  //  'page arguments' => array('sigma_settings_form'),
   //  'access callback' => 'user_access',
   //  'access arguments' => array('administer sigma instagram'),
   //  'type' => MENU_LOCAL_TASK,
-  //  'weight' => 2,
+  //  'file' => 'includes/sigma.admin.inc',
+  //  'weight' => 1,
   //);
 
   return $items;

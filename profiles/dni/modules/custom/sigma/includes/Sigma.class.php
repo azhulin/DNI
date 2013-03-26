@@ -22,8 +22,8 @@ class Sigma {
     $this->drupal_url = variable_get('sigma_drupal_url');
     $this->client_id = variable_get('sigma_client_id');
     $this->client_secret = variable_get('sigma_client_secret');
-    $this->node_host = variable_get('sigma_node_host');
-    $this->node_port = variable_get('sigma_node_port');
+    $this->node_host = variable_get('sigma_server_host');
+    $this->node_port = variable_get('sigma_server_port');
     $this->access_key = variable_get('sigma_access_key');
   }
 

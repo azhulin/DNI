@@ -4,38 +4,64 @@
 /**
  * Form constructor for Node.js server settings form.
  */
-function sigma_node_server_form() {
-  if (!variable_get('sigma_client_id') || !variable_get('sigma_client_secret')) {
-    drupal_goto('admin/config/services/sigma/settings');
-  }
-
+function sigma_settings_form() {
   global $drupal_hash_salt;
 
   $form = array();
 
-  $form['settings'] = array(
+  $form['instagram'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Instagram settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['instagram']['client_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Instagram Client ID'),
+    '#default_value' => variable_get('sigma_client_id', ''),
+    '#size' => 32,
+    '#maxlength' => 32,
+    '#required' => TRUE,
+  );
+
+  $form['instagram']['client_secret'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Instagram Client Secret'),
+    '#default_value' => variable_get('sigma_client_secret', ''),
+    '#size' => 32,
+    '#maxlength' => 32,
+    '#required' => TRUE,
+  );
+
+  $form['instagram']['instagram_submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save Instagram Settings'),
+  );
+
+  $form['server'] = array(
     '#type' => 'fieldset',
     '#title' => t('Server settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
 
-  $form['settings']['node_host'] = array(
+  $form['server']['server_host'] = array(
     '#type' => 'item',
     '#title' => t('Node server host'),
-    '#markup' => variable_get('sigma_node_host'),
+    '#markup' => variable_get('sigma_server_host'),
   );
 
-  $form['settings']['node_port'] = array(
+  $form['server']['server_port'] = array(
     '#type' => 'textfield',
     '#title' => t('Node server port'),
-    '#default_value' => variable_get('sigma_node_port', 80),
+    '#default_value' => variable_get('sigma_server_port', 80),
     '#size' => 4,
     '#maxlength' => 4,
     '#required' => TRUE,
   );
 
-  $form['settings']['access_key'] = array(
+  $form['server']['access_key'] = array(
     '#type' => 'textfield',
     '#title' => t('Access key'),
     '#description' => t('Access key is used to generate access tokens'
@@ -46,9 +72,9 @@ function sigma_node_server_form() {
     '#required' => TRUE,
   );
 
-  $form['settings']['submit'] = array(
+  $form['server']['server_submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save'),
+    '#value' => t('Save Server Settings'),
   );
 
   $form['status'] = array(
@@ -59,12 +85,12 @@ function sigma_node_server_form() {
       . '<span class="server-status server-status-off">' . t('Offline') . '</span>',
   );
 
-  $form['node_start'] = array(
+  $form['server_start'] = array(
     '#type' => 'submit',
     '#value' => t('Start Server'),
   );
 
-  $form['node_stop'] = array(
+  $form['server_stop'] = array(
     '#type' => 'submit',
     '#value' => t('Stop Server'),
   );
@@ -88,10 +114,15 @@ function sigma_node_server_form() {
 /**
  * Form validation handler for sigma_node_server_form().
  */
-function sigma_node_server_form_validate($form, &$form_state) {
-  if (!is_int($form_state['values']['node_port'])
-      && 0 >= $form_state['values']['node_port']) {
-    form_set_error('node_port', t('Invalid port.'));
+function sigma_settings_form_validate($form, &$form_state) {
+  foreach (array('client_id', 'client_secret') as $key) {
+    if (!preg_match('/^[a-f0-9]{32}$/', trim(check_plain($form_state['values'][$key])))) {
+      form_set_error($key, t('Invalid parameter.'));
+    }
+  }
+  if (!is_int($form_state['values']['server_port'])
+      && 0 >= $form_state['values']['server_port']) {
+    form_set_error('server_port', t('Invalid port.'));
   }
 }
 
@@ -99,13 +130,18 @@ function sigma_node_server_form_validate($form, &$form_state) {
 /**
  * Form submission handler for sigma_settings_form().
  */
-function sigma_node_server_form_submit($form, &$form_state) {
-  @file_put_contents('D:/log.txt',date('m-d-y H:i:s').' '.basename(__FILE__).':'.__LINE__.">\n".print_r($form_state['values'],1)."\n",FILE_APPEND);
-
+function sigma_settings_form_submit($form, &$form_state) {
   $data = $form_state['values'];
   switch ($data['op']) {
-    case 'Save':
-      foreach (array('node_port', 'access_key') as $key) {
+    case 'Save Instagram Settings':
+      foreach (array('client_id', 'client_secret') as $key) {
+        variable_set('sigma_' . $key, trim(check_plain($form_state['values'][$key])));
+      }
+      drupal_set_message(t('Settings were successfully updated. Node server should be restarted.'));
+      break;
+
+    case 'Save Server Settings':
+      foreach (array('server_port', 'access_key') as $key) {
         variable_set('sigma_' . $key, trim(check_plain($form_state['values'][$key])));
       }
       drupal_set_message(t('Settings were successfully updated. Node server should be restarted.'));
@@ -115,65 +151,6 @@ function sigma_node_server_form_submit($form, &$form_state) {
       $sigma = Sigma::getInstance();
       $sigma->start_node_server();
       break;
+
   }
-
-
-
-}
-
-
-/**
- * Form constructor for Sigma settings form.
- */
-function sigma_settings_form() {
-  $form = array();
-
-  $form['client_id'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Instagram Client ID'),
-    '#default_value' => variable_get('sigma_client_id', ''),
-    '#size' => 32,
-    '#maxlength' => 32,
-    '#required' => TRUE,
-  );
-
-  $form['client_secret'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Instagram Client Secret'),
-    '#default_value' => variable_get('sigma_client_secret', ''),
-    '#size' => 32,
-    '#maxlength' => 32,
-    '#required' => TRUE,
-  );
-
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save'),
-  );
-
-  return $form;
-}
-
-
-/**
- * Form validation handler for sigma_settings_form().
- */
-function sigma_settings_form_validate($form, &$form_state) {
-  foreach (array('client_id', 'client_secret') as $key) {
-    if (!preg_match('/^[a-f0-9]{32}$/', trim(check_plain($form_state['values'][$key])))) {
-      form_set_error($key, t('Invalid parameter.'));
-    }
-  }
-}
-
-
-/**
- * Form submission handler for sigma_settings_form().
- */
-function sigma_settings_form_submit($form, &$form_state) {
-  foreach (array('client_id', 'client_secret') as $key) {
-    variable_set('sigma_' . $key, trim(check_plain($form_state['values'][$key])));
-  }
-  $form_state['redirect'] = 'admin/config/services/sigma';
-  drupal_set_message(t('Settings were successfully updated. Node server should be restarted.'));
 }

@@ -3,8 +3,8 @@
   function AdminController() {
     this.el = {
       status: $('#edit-status'),
-      start: $('#edit-node-start'),
-      stop: $('#edit-node-stop')
+      start: $('#edit-server-start'),
+      stop: $('#edit-server-stop')
     };
   }
 
