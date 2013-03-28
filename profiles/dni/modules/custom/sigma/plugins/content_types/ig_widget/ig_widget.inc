@@ -38,7 +38,10 @@ function sigma_ig_widget_content_type_admin_info($subtype, $conf) {
 function sigma_ig_widget_content_type_render($subtype, $conf) {
   $block = new stdClass();
   $block->title = '';
-  $block->content = '<div></div>';
+  $block->content = '<div class="sigma-widget" subscription="' . $conf['id'] . '">' . $conf['id'] . '</div>';
+  sigma_prepare_js();
+  ctools_add_js('ig_widget', 'sigma', 'plugins/content_types/ig_widget');
+  ctools_add_css('ig_widget', 'sigma', 'plugins/content_types/ig_widget');
 
   return $block;
 }
@@ -82,14 +85,9 @@ function sigma_ig_widget_content_type_edit_form($form, &$form_state) {
 
   $form += sigma_render_status();
 
-  $path = drupal_get_path('module', 'sigma');
-  $form['#attached']['js'][] = $path . '/js/client/socket.io.min.js';
-  $form['#attached']['js'][] = $path . '/js/client/sigma.js';
-  $form['#attached']['js'][] = $path . '/plugins/content_types/ig_widget/ig_widget.js';
-  $form['#attached']['css'][] = $path . '/plugins/content_types/ig_widget/ig_widget.css';
-
-  $sigma = Sigma::getInstance();
-  $sigma->send_node_server_url();
+  sigma_prepare_js();
+  ctools_add_js('ig_widget.admin', 'sigma', 'plugins/content_types/ig_widget');
+  ctools_add_css('ig_widget.admin', 'sigma', 'plugins/content_types/ig_widget');
 
   return $form;
 }

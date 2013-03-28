@@ -1,7 +1,7 @@
 (function($) {
 
-  function WidgetController() {
-    /*this.context = $('#modalContent');
+  function WidgetAdminController() {
+    this.context = $('#modalContent');
     this.el = {
       id: $('#edit-id', this.context),
       type: $('#edit-type', this.context),
@@ -11,23 +11,13 @@
       submit: $('input.form-submit', this.context),
       modal: $('#modal-content', this.context),
       row: null
-    };*/
-
-    var self = this;
-    this.widgets = {};
-    $('.sigma-widget').each(function() {
-      var id = $(this).attr('subscription');
-      !(id in self.widgets) && (self.widgets[id] = []);
-      self.widgets[id].push($(this));
-    });
-    console.log(this.widgets);
+    };
   }
 
 
-  WidgetController.prototype.init = function(object) {
-    var groups = Object.keys(this.widgets);
+  WidgetAdminController.prototype.init = function(object) {
     this.sigma = new Sigma({
-      group: groups,
+      group: 'widget_settings',
       callbacks: {
         aOnline: {
           success: function(data) {
@@ -38,20 +28,20 @@
           success: function(data) {
             object.isOffline(data);
           }
-        }/*,
+        },
         aGetSubscription: {
           success: function(data) {
             object.refreshSubsList(data);
           }
-        }*/
+        }
       }
     }).init();
     this.sigma && this.start();
   };
 
 
-  WidgetController.prototype.start = function() {
-    /*var self = this;
+  WidgetAdminController.prototype.start = function() {
+    var self = this;
     this.el.submit.click(function() {
       var radio = $('input[name=subscription_id]:checked', self.el.subsList);
       var id = radio.val();
@@ -62,31 +52,29 @@
       self.el.type.val(type);
       self.el.object.val(object);
     });
-    this.el.row = $('tr:last', this.subsList).attr('class', '').detach();*/
+    this.el.row = $('tr:last', this.subsList).attr('class', '').detach();
   };
 
 
-  WidgetController.prototype.isOnline = function() {
-    console.log('IN ONLINE CALLBACK');
-    //this.sigma.online();
-    //this.sigma.getSubscription();
+  WidgetAdminController.prototype.isOnline = function() {
+    this.sigma.online();
+    this.sigma.getSubscription();
   };
 
 
-  WidgetController.prototype.isOffline = function() {
-    console.log('IN OFFLINE CALLBACK');
-    //this.sigma.offline();
-    //this.el.subsContainer.hide();
+  WidgetAdminController.prototype.isOffline = function() {
+    this.sigma.offline();
+    this.el.subsContainer.hide();
   };
 
 
-  /*WidgetController.prototype.refreshSubsList = function(data) {
+  WidgetAdminController.prototype.refreshSubsList = function(data) {
     this.buildSubsList(data);
     this.el.subsContainer.show();
-  };*/
+  };
 
 
-  /*WidgetController.prototype.buildSubsList = function(data) {
+  WidgetAdminController.prototype.buildSubsList = function(data) {
     console.log(data);
     var self = this;
     $('tr:gt(0)', self.el.subsList).remove();
@@ -95,7 +83,11 @@
     data.data.forEach(function(item) {
       ids.push(item.id);
     });
-    0 > ids.indexOf(id) && (id = ids[0]);
+    if (0 > ids.indexOf(id)) {
+      id && this.setMessage(Drupal.t('Original subscription "@id" wad removed.'
+        + ' Please select another one for this widget.', { '@id': id }), 'warning');
+      id = ids[0];
+    }
     $.each(data.data, function(i, item) {
       var row = self.el.row.clone();
       var col = $('td:eq(0) input', row).val(item.id).attr('row', 1 + i);
@@ -105,12 +97,23 @@
       $('td:eq(3)', row).text('#' + item.object);
       row.addClass(i % 2 ? 'even' : 'odd').appendTo(self.el.subsList);
     });
-  };*/
+  };
+
+
+  WidgetAdminController.prototype.setMessage = function(message, type) {
+    $('div.messages', this.el.modal).remove();
+    type = type || 'status';
+    $('<div class="messages ' + type + '">' + message + '</div>')
+      .prependTo(this.el.modal);
+  };
 
 
   $(function() {
-    var self = new WidgetController();
-    self.init(self);
+    initWidgetAdminController = function() {
+      var self = new WidgetAdminController();
+      self.init(self);
+    };
+    setTimeout(initWidgetAdminController, 1000);
   });
 
 })(jQuery);

@@ -26,7 +26,7 @@ else {
   log = function() {};
 }
 
-log(settings);
+//log(settings);
 
 function getHeaders(type) {
   type = type || 'json';
@@ -44,44 +44,80 @@ function getHeaders(type) {
   return headers;
 }
 
+var groups = [];
 var clients = {};
+var subscriptions = [];
+var groupPermissions = {
+  exit: [ 'settings' ],
+  getSubscription: [ 'settings', 'widget_settings' ],
+  postSubscription: [ 'settings' ],
+  deleteSubscription: [ 'settings' ]
+};
+
+
+subscription.get(function(data) {
+  subscriptions = subscription.getList(data);
+  log(subscriptions);
+});
+
+
+function checkClientAccess(event, groups) {
+  for (var i = 0; i < groups.length; ++i) {
+    if (0 <= groupPermissions[event].indexOf(groups[i])) {
+      return true;
+    }
+  }
+  return false;
+}
+
 
 server.listen(settings.port);
 io.sockets.on('connection', function(socket) {
 
   socket.on('disconnect', function() {
-    log(socket.group);
-    if ('group' in socket) {
-      clients[socket.group].splice(clients[socket.group].indexOf(socket), 1);
-      // UPDATE CLIENT LIST
+    log(socket.groups);
+    if ('groups' in socket) {
+      socket.groups.forEach(function(group) {
+        clients[group].splice(clients[group].indexOf(socket), 1);
+        // UPDATE CLIENT LIST
+      });
     }
   });
 
   socket.emit('aOnline', { status: 'OK' });
 
-  socket.on('qOnline', function(group) {
-    if (group) {
-      socket.group = group;
-      socket.join(group);
-      if (!(group in clients)) {
-        clients[group] = [];
-      }
-      clients[group].push(socket.handshake);
-    }
-    else {
+  socket.on('qOnline', function(param) {
+    if (!param) {
       socket.disconnect();
     }
+    else {
+      'String' === utils.typeOf(param) && (param = [ param ]);
+      socket.groups = param;
+      param.forEach(function(group) {
+        0 > groups.indexOf(group) && groups.push(group);
+        socket.join(group);
+        if (!(group in clients)) {
+          clients[group] = [];
+        }
+        clients[group].push(socket.handshake);
+      });
+    }
     log(clients);
+    log(groups);
+    log(subscriptions);
   });
 
   socket.on('qExit', function() {
-    io.sockets.emit('aExit', { status: 'OK' });
-    process.exit();
+    if (checkClientAccess('exit', socket.groups)) {
+      io.sockets.emit('aExit', { status: 'OK' });
+      process.exit();
+    }
   });
 
   socket.on('qGetSubscription', function() {
-    if ('settings' === socket.group || 'widget_settings' === socket.group) {
+    if (checkClientAccess('getSubscription', socket.groups)) {
       subscription.get(function(data) {
+        subscriptions = subscription.getList(data);
         socket.emit('aGetSubscription', data);
       });
     }
@@ -89,7 +125,7 @@ io.sockets.on('connection', function(socket) {
   });
 
   socket.on('qPostSubscription', function(data) {
-    if ('settings' === socket.group) {
+    if (checkClientAccess('postSubscription', socket.groups)) {
       subscription.post(data.object, data.object_id, function() {
         subscription.get(function(data) {
           io.sockets.emit('aGetSubscription', data);
@@ -100,7 +136,7 @@ io.sockets.on('connection', function(socket) {
   });
 
   socket.on('qDeleteSubscription', function(data) {
-    if ('settings' === socket.group) {
+    if (checkClientAccess('deleteSubscription', socket.groups)) {
       subscription.delete(data.type, data.param, function() {
         subscription.get(function(data) {
           io.sockets.emit('aGetSubscription', data);

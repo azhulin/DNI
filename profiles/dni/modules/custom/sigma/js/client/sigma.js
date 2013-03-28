@@ -19,6 +19,9 @@ function Sigma(params) {
     ],
     widget_settings: [
       'aOnline', 'aExit', 'aGetSubscription'
+    ],
+    widget: [
+      'aOnline', 'aExit'
     ]
   };
 

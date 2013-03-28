@@ -138,13 +138,10 @@ function sigma_settings_form() {
   );
 
   $form['#attached']['js'] = array(
-    drupal_get_path('module', 'sigma') . '/js/client/socket.io.min.js',
-    drupal_get_path('module', 'sigma') . '/js/client/sigma.js',
     drupal_get_path('module', 'sigma') . '/js/client/sigma_admin.js',
   );
-
-  $sigma = Sigma::getInstance();
-  $sigma->send_node_server_url();
+  
+  sigma_prepare_js();
 
   return $form;
 }

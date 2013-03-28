@@ -97,3 +97,15 @@ function sigma_render_status() {
 
   return $form;
 }
+
+
+/**
+ * Includes required js files.
+ */
+function sigma_prepare_js() {
+  ctools_add_js('socket.io.min', 'sigma', 'js/client');
+  ctools_add_js('sigma', 'sigma', 'js/client');
+
+  $sigma = Sigma::getInstance();
+  $sigma->send_node_server_url();
+}

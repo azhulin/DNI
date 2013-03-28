@@ -114,3 +114,14 @@ Subscription.prototype.confirm = function(req, res) {
   }
   res.end(response);
 };
+
+
+Subscription.prototype.getList = function(data) {
+  var result = [];
+  if (data && 'data' in data) {
+    data.data.forEach(function(item) {
+      result.push(item.id);
+    });
+  }
+  return result;
+};
