@@ -1,3 +1,5 @@
+var $ = require('./$');
+
 function define(name, value) {
   Object.defineProperty(exports, name, {
     value: value,
@@ -14,7 +16,7 @@ process.argv.forEach(function(value, index, array) {
     return;
   }
   value = value.split('=');
-  if (2 === value.length && 0 <= allowed.indexOf(value[0]) && value[1]) {
+  if (2 === value.length && $.in(value[0], allowed) && value[1]) {
     define(value[0], value[1]);
   }
 });

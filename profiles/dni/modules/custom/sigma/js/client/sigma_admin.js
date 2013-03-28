@@ -18,7 +18,7 @@
 
   AdminController.prototype.init = function(ac) {
     this.sigma = new Sigma({
-      group: 'settings',
+      group: 'adminSettings',
       callbacks: {
         aOnline: {
           success: function(data) {

@@ -9,7 +9,7 @@ var express = require('express')
   , Subscription = require('./subscription')
   , subscription = new Subscription()
   , settings = require('./settings')
-  , utils = require('./utils')
+  , $ = require('./$')
   //, AccessCard = require('./access_card')
   ;
 
@@ -28,30 +28,15 @@ else {
 
 //log(settings);
 
-function getHeaders(type) {
-  type = type || 'json';
-  var headers = {};
-  switch (type) {
-    case 'json':
-      headers['Content-Type'] = 'text/json; charset=utf-8';
-      break;
-
-    case 'html':
-      headers['Content-Type'] = 'text/html; charset=utf-8';
-      break;
-
-  }
-  return headers;
-}
-
 var groups = [];
+var channels = {};
 var clients = {};
 var subscriptions = [];
 var groupPermissions = {
-  exit: [ 'settings' ],
-  getSubscription: [ 'settings', 'widget_settings' ],
-  postSubscription: [ 'settings' ],
-  deleteSubscription: [ 'settings' ]
+  adminSettings: [ 'exit', 'getSubscription', 'postSubscription', 'deleteSubscription' ],
+  widgetSettings: [ 'getSubscription' ],
+  adminClient: [],
+  client: []
 };
 
 
@@ -61,11 +46,9 @@ subscription.get(function(data) {
 });
 
 
-function checkClientAccess(event, groups) {
-  for (var i = 0; i < groups.length; ++i) {
-    if (0 <= groupPermissions[event].indexOf(groups[i])) {
-      return true;
-    }
+function checkAccess(event, group) {
+  if (group in groupPermissions && $.in(event, groupPermissions[group])) {
+    return true;
   }
   return false;
 }
@@ -75,32 +58,27 @@ server.listen(settings.port);
 io.sockets.on('connection', function(socket) {
 
   socket.on('disconnect', function() {
-    log(socket.groups);
-    if ('groups' in socket) {
-      socket.groups.forEach(function(group) {
-        clients[group].splice(clients[group].indexOf(socket), 1);
-        // UPDATE CLIENT LIST
-      });
+    log(socket.group);
+    if ('group' in socket) {
+      clients[socket.group].splice(clients[socket.group].indexOf(socket), 1);
+      // UPDATE CLIENT LIST
     }
   });
 
   socket.emit('aOnline', { status: 'OK' });
 
-  socket.on('qOnline', function(param) {
-    if (!param) {
+  socket.on('qOnline', function(group) {
+    if (!(group in groupPermissions)) {
       socket.disconnect();
     }
     else {
-      'String' === utils.typeOf(param) && (param = [ param ]);
-      socket.groups = param;
-      param.forEach(function(group) {
-        0 > groups.indexOf(group) && groups.push(group);
-        socket.join(group);
-        if (!(group in clients)) {
-          clients[group] = [];
-        }
-        clients[group].push(socket.handshake);
-      });
+      socket.group = group;
+      !$.in(group, groups) && groups.push(group);
+      socket.join(group);
+      if (!(group in clients)) {
+        clients[group] = [];
+      }
+      clients[group].push(socket.handshake);
     }
     log(clients);
     log(groups);
@@ -108,14 +86,14 @@ io.sockets.on('connection', function(socket) {
   });
 
   socket.on('qExit', function() {
-    if (checkClientAccess('exit', socket.groups)) {
+    if (checkAccess('exit', socket.group)) {
       io.sockets.emit('aExit', { status: 'OK' });
       process.exit();
     }
   });
 
   socket.on('qGetSubscription', function() {
-    if (checkClientAccess('getSubscription', socket.groups)) {
+    if (checkAccess('getSubscription', socket.group)) {
       subscription.get(function(data) {
         subscriptions = subscription.getList(data);
         socket.emit('aGetSubscription', data);
@@ -125,7 +103,7 @@ io.sockets.on('connection', function(socket) {
   });
 
   socket.on('qPostSubscription', function(data) {
-    if (checkClientAccess('postSubscription', socket.groups)) {
+    if (checkAccess('postSubscription', socket.group)) {
       subscription.post(data.object, data.object_id, function() {
         subscription.get(function(data) {
           io.sockets.emit('aGetSubscription', data);
@@ -136,7 +114,7 @@ io.sockets.on('connection', function(socket) {
   });
 
   socket.on('qDeleteSubscription', function(data) {
-    if (checkClientAccess('deleteSubscription', socket.groups)) {
+    if (checkAccess('deleteSubscription', socket.group)) {
       subscription.delete(data.type, data.param, function() {
         subscription.get(function(data) {
           io.sockets.emit('aGetSubscription', data);

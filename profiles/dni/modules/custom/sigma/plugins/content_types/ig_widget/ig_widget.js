@@ -20,14 +20,15 @@
       !(id in self.widgets) && (self.widgets[id] = []);
       self.widgets[id].push($(this));
     });
+    //Object.keys(this.widgets);
     console.log(this.widgets);
   }
 
 
   WidgetController.prototype.init = function(object) {
-    var groups = Object.keys(this.widgets);
+    var group = 'client';
     this.sigma = new Sigma({
-      group: groups,
+      group: group,
       callbacks: {
         aOnline: {
           success: function(data) {

@@ -17,7 +17,7 @@
 
   WidgetAdminController.prototype.init = function(object) {
     this.sigma = new Sigma({
-      group: 'widget_settings',
+      group: 'widgetSettings',
       callbacks: {
         aOnline: {
           success: function(data) {

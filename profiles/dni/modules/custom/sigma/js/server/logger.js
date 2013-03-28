@@ -1,8 +1,7 @@
 var fs = require('fs')
   , util = require('util')
   , path = require('path')
-
-  , utils = require('./utils')
+  , $ = require('./$')
   ;
 
 
@@ -44,7 +43,7 @@ function Logger(file) {
 Logger.prototype.log = function(message) {
   var date = new Date().toISOString();
   var file = path.basename(__file);
-  if (0 <= ['Array', 'Object'].indexOf(utils.typeOf(message))) {
+  if ($.in($.type(message), ['Array', 'Object'])) {
     message = util.inspect(message, false, 4);
   }
   message = '>>>> ' + date + ' ' + file + ':' + __line + '>\n' + message + '\n';

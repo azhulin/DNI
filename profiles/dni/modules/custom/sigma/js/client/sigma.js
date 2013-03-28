@@ -14,13 +14,13 @@ function Sigma(params) {
   });
 
   var events = {
-    settings: [
+    adminSettings: [
       'aOnline', 'aExit', 'aGetSubscription', 'aPostSubscription', 'aDeleteSubscription'
     ],
-    widget_settings: [
+    widgetSettings: [
       'aOnline', 'aExit', 'aGetSubscription'
     ],
-    widget: [
+    client: [
       'aOnline', 'aExit'
     ]
   };

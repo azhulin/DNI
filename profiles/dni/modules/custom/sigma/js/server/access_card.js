@@ -13,7 +13,6 @@ function AccessCard(options) {
 AccessCard.prototype.create = function(card) {
   card.expires = new Date().getTime() + this.lifeTime;
   card = new Buffer(encode(JSON.stringify(card)), 'binary').toString('base64');
-
   return card;
 };
 
@@ -44,11 +43,9 @@ function encode(card) {
     var seq = shasum.update(gamma + this.salt).digest('hex');
     gamma += seq.substr(0, 8);
   }
-
   var result = '';
   for (var i = 0; i < card.length && i < gamma.length; ++i) {
     result += String.fromCharCode(card.charCodeAt(i) ^ gamma.charCodeAt(i));
   }
-
   return result;
 }
