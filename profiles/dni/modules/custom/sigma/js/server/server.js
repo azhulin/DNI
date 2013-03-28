@@ -31,7 +31,7 @@ else {
 var groups = [];
 var channels = {};
 var clients = {};
-var subscriptions = [];
+global.subscriptions = [];
 var groupPermissions = {
   adminSettings: [ 'exit', 'getSubscription', 'postSubscription', 'deleteSubscription' ],
   widgetSettings: [ 'getSubscription' ],
@@ -42,12 +42,11 @@ var groupPermissions = {
 
 subscription.get(function(data) {
   subscriptions = subscription.getList(data);
-  log(subscriptions);
 });
 
 
 function checkAccess(event, group) {
-  if (group in groupPermissions && $.in(event, groupPermissions[group])) {
+  if (group in groupPermissions && groupPermissions[group].contains(event)) {
     return true;
   }
   return false;
@@ -67,18 +66,27 @@ io.sockets.on('connection', function(socket) {
 
   socket.emit('aOnline', { status: 'OK' });
 
-  socket.on('qOnline', function(group) {
+  socket.on('qOnline', function(group, subs) {
     if (!(group in groupPermissions)) {
       socket.disconnect();
     }
     else {
+      subs = subs || [];
+      if ('client' === group) {
+        subs = subscription.filter(subs, socket);
+        !subs.length && socket.disconnect();
+      }
+
       socket.group = group;
-      !$.in(group, groups) && groups.push(group);
+      groups.pushU(group);
       socket.join(group);
       if (!(group in clients)) {
         clients[group] = [];
       }
-      clients[group].push(socket.handshake);
+      clients[group].push({
+        subscriptions: subs,
+        info: socket.handshake
+      });
     }
     log(clients);
     log(groups);

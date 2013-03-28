@@ -20,7 +20,6 @@
       !(id in self.widgets) && (self.widgets[id] = []);
       self.widgets[id].push($(this));
     });
-    //Object.keys(this.widgets);
     console.log(this.widgets);
   }
 
@@ -29,6 +28,7 @@
     var group = 'client';
     this.sigma = new Sigma({
       group: group,
+      subscriptions: Object.keys(this.widgets),
       callbacks: {
         aOnline: {
           success: function(data) {
@@ -39,12 +39,12 @@
           success: function(data) {
             object.isOffline(data);
           }
-        }/*,
-        aGetSubscription: {
+        },
+        aBadSubscription: {
           success: function(data) {
-            object.refreshSubsList(data);
+            object.badSubscription(data);
           }
-        }*/
+        }
       }
     }).init();
     this.sigma && this.start();
@@ -81,10 +81,14 @@
   };
 
 
-  /*WidgetController.prototype.refreshSubsList = function(data) {
-    this.buildSubsList(data);
-    this.el.subsContainer.show();
-  };*/
+  WidgetController.prototype.badSubscription = function(data) {
+    console.log(data);
+    this.widgets[data.id].forEach(function(widget) {
+      widget.html('Bad Subscription');
+    });
+    delete this.widgets[data.id];
+    console.log(this.widgets);
+  };
 
 
   /*WidgetController.prototype.buildSubsList = function(data) {

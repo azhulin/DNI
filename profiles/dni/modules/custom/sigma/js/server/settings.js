@@ -16,7 +16,7 @@ process.argv.forEach(function(value, index, array) {
     return;
   }
   value = value.split('=');
-  if (2 === value.length && $.in(value[0], allowed) && value[1]) {
+  if (2 === value.length && allowed.contains(value[0]) && value[1]) {
     define(value[0], value[1]);
   }
 });

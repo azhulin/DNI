@@ -3,9 +3,11 @@ exports.type = function(target) {
 };
 
 
-exports.in = function(needle, haystack) {
-  if (-1 !== haystack.indexOf(needle)) {
-    return true;
-  }
-  return false;
+Array.prototype.contains = function(item) {
+  return -1 !== this.indexOf(item);
+};
+
+
+Array.prototype.pushU = function(item) {
+  !this.contains(item) && this.push(item);
 };

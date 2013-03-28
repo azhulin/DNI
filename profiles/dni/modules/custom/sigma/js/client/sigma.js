@@ -1,6 +1,7 @@
 function Sigma(params) {
   var callbacks = params.callbacks;
   var group = params.group;
+  var subscriptions = 'subscriptions' in params ? params.subscriptions : [];
 
   if (!('sigma' in Drupal.settings) || !('host' in Drupal.settings.sigma)) {
     return;
@@ -10,7 +11,7 @@ function Sigma(params) {
   var self = this;
 
   this.socket.on('aOnline', function() {
-    self.socket.emit('qOnline', group);
+    self.socket.emit('qOnline', group, subscriptions);
   });
 
   var events = {
@@ -21,7 +22,7 @@ function Sigma(params) {
       'aOnline', 'aExit', 'aGetSubscription'
     ],
     client: [
-      'aOnline', 'aExit'
+      'aOnline', 'aExit', 'aBadSubscription'
     ]
   };
 

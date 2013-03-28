@@ -125,3 +125,18 @@ Subscription.prototype.getList = function(data) {
   }
   return result;
 };
+
+
+Subscription.prototype.filter = function(subs, socket) {
+  global.subscriptions;
+  var filteredSubs = [];
+  subs.forEach(function(item) {
+    if (subscriptions.contains(item)) {
+      filteredSubs.pushU(item);
+    }
+    else {
+      socket.emit('aBadSubscription', { id: item });
+    }
+  });
+  return filteredSubs;
+};

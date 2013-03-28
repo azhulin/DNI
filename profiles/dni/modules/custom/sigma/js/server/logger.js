@@ -43,7 +43,7 @@ function Logger(file) {
 Logger.prototype.log = function(message) {
   var date = new Date().toISOString();
   var file = path.basename(__file);
-  if ($.in($.type(message), ['Array', 'Object'])) {
+  if (['Array', 'Object'].contains($.type(message))) {
     message = util.inspect(message, false, 4);
   }
   message = '>>>> ' + date + ' ' + file + ':' + __line + '>\n' + message + '\n';
