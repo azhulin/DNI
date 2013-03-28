@@ -10,6 +10,19 @@ function sigma_init() {
 
 
 /**
+ * Implements hook_ctools_plugin_directory().
+ */
+function sigma_ctools_plugin_directory($module, $plugin) {
+  if ('ctools' == $module && 'content_types' == $plugin) {
+    return 'plugins/content_types';
+  }
+  if ('panels' == $module && 'layouts' == $plugin) {
+    return 'plugins/layouts';
+  }
+}
+
+
+/**
  * Implements hook_menu().
  */
 function sigma_menu() {
@@ -66,4 +79,21 @@ function sigma_permission() {
   );
 
   return $permissions;
+}
+
+
+/**
+ * Returns rendered server status form element.
+ */
+function sigma_render_status() {
+  $form = array(
+    'status' => array(
+    '#type' => 'item',
+    '#title' => t('Server status'),
+    '#markup' => '<span class="server-status server-status-off">' . t('Offline') . '</span>'
+      . '<span class="server-status server-status-on">' . t('Online') . '</span>'
+    ),
+  );
+
+  return $form;
 }

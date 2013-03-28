@@ -1,5 +1,4 @@
 #edit-status,
-#edit-server-start,
 #edit-server-stop,
 #edit-subs,
 #edit-subs-new {
@@ -20,13 +19,8 @@
   text-transform: uppercase;
 }
 
-.server-status.server-status-checking {
-  background-color: #999;
-}
-
 .server-status.server-status-off {
   background-color: #A00;
-  display: none;
 }
 
 .server-status.server-status-on {

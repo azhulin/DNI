@@ -1,85 +1,80 @@
-function Sigma() {
-  if ('sigma' in Drupal.settings && 'host' in Drupal.settings.sigma) {
-    this.host = Drupal.settings.sigma.host;
-    this.socket = io.connect(this.host);
+function Sigma(params) {
+  var callbacks = params.callbacks;
+  var group = params.group;
+
+  if (!('sigma' in Drupal.settings) || !('host' in Drupal.settings.sigma)) {
+    return;
   }
+  this.socket = io.connect(Drupal.settings.sigma.host);
+
+  var self = this;
+
+  this.socket.on('aOnline', function() {
+    self.socket.emit('qOnline', group);
+  });
+
+  var events = {
+    settings: [
+      'aOnline', 'aExit', 'aGetSubscription', 'aPostSubscription', 'aDeleteSubscription'
+    ],
+    widget_settings: [
+      'aOnline', 'aExit', 'aGetSubscription'
+    ]
+  };
+
+  events[group].forEach(function(event) {
+    self.socket.on(event, function(data) {
+      if (data) {
+        console.log(event + ' OK');
+        event in callbacks && 'success' in callbacks[event] && callbacks[event].success(data);
+      }
+      else {
+        console.log(event + ' ERROR');
+        event in callbacks && 'error' in callbacks[event] && callbacks[event].error();
+      }
+    });
+  });
 }
 
 
-Sigma.prototype.ping = function(success, error, complete) {
-  var $ = jQuery;
-  $.ajax({
-    url: this.host + 'ping',
-    type: 'GET',
-    timeout: 2000,
-    success: function(data) {
-      success && success(data);
-    },
-    error: function(xhr) {
-      error && error(xhr.status);
-    },
-    complete: function() {
-      complete && complete();
-    }
-  });
+Sigma.prototype.init = function() {
+  if ('socket' in this) {
+    this.status = jQuery('#edit-status');
+    return this;
+   }
+   else {
+     return false;
+   }
 };
 
 
-Sigma.prototype.exit = function(success, error) {
+Sigma.prototype.exit = function() {
   this.socket.emit('qExit');
-  this.socket.on('aExit', function(data) {
-    if (data) {
-      console.log('EXIT OK');
-      success && success();
-    }
-    else {
-      console.log('EXIT ERROR');
-      error && error();
-    }
-  });
 };
 
 
-Sigma.prototype.getSubscription = function(success, error) {
+Sigma.prototype.getSubscription = function() {
   this.socket.emit('qGetSubscription');
-  this.socket.on('aGetSubscription', function(data) {
-    if (data) {
-      console.log('GET SUBSCRIPTION OK');
-      success && success(data);
-    }
-    else {
-      console.log('GET SUBSCRIPTION ERROR');
-      error && error();
-    }
-  });
 };
 
 
-Sigma.prototype.postSubscription = function(object, object_id, success, error) {
+Sigma.prototype.postSubscription = function(object, object_id) {
   this.socket.emit('qPostSubscription', { object: object, object_id: object_id });
-  this.socket.on('aPostSubscription', function(data) {
-    if (data) {
-      console.log('POST SUBSCRIPTION OK');
-      success && success(data);
-    }
-    else {
-      console.log('POST SUBSCRIPTION ERROR');
-      error && error();
-    }
-  });
 };
 
 
-Sigma.prototype.deleteSubscription = function(id, success, error) {
+Sigma.prototype.deleteSubscription = function(id) {
   this.socket.emit('qDeleteSubscription', { type: 'id', param: id });
-  this.socket.on('aDeleteSubscription', function(data) {
-    if (data) {
-      console.log('DELETE SUBSCRIPTION OK');
-      success && success(data);
-    }
-    else {
-      console.log('DELETE SUBSCRIPTION ERROR');
-      error && error();
-    }
-  });
+};
+
+
+Sigma.prototype.online = function() {
+  jQuery('.server-status', this.status).hide();
+  jQuery('.server-status.server-status-on', this.status).show();
+};
+
+
+Sigma.prototype.offline = function() {
+  jQuery('.server-status', this.status).hide();
+  jQuery('.server-status.server-status-off', this.status).show();
 };

@@ -121,13 +121,7 @@ function sigma_settings_form() {
     '#value' => t('Cancel'),
   );
 
-  $form['status'] = array(
-    '#type' => 'item',
-    '#title' => 'Server status',
-    '#markup' => '<span class="server-status server-status-checking">' . t('Checking...') . '</span>'
-      . '<span class="server-status server-status-on">' . t('Online') . '</span>'
-      . '<span class="server-status server-status-off">' . t('Offline') . '</span>',
-  );
+  $form += sigma_render_status();
 
   $form['server_start'] = array(
     '#type' => 'submit',
@@ -165,8 +159,7 @@ function sigma_settings_form_validate($form, &$form_state) {
       form_set_error($key, t('Invalid parameter.'));
     }
   }
-  if (!is_int($form_state['values']['server_port'])
-      && 0 >= $form_state['values']['server_port']) {
+  if (!is_int($form_state['values']['server_port']) && 0 >= $form_state['values']['server_port']) {
     form_set_error('server_port', t('Invalid port.'));
   }
 }
@@ -196,7 +189,6 @@ function sigma_settings_form_submit($form, &$form_state) {
       $sigma = Sigma::getInstance();
       $sigma->start_node_server();
       break;
-
   }
 }
 
