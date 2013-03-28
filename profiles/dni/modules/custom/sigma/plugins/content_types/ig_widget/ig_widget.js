@@ -44,6 +44,11 @@
           success: function(data) {
             object.badSubscription(data);
           }
+        },
+        aUpdate: {
+          success: function(data) {
+            object.update(data);
+          }
         }
       }
     }).init();
@@ -83,7 +88,7 @@
 
   WidgetController.prototype.badSubscription = function(data) {
     console.log(data);
-    this.widgets[data.id].forEach(function(widget) {
+    data.id in this.widgets && this.widgets[data.id].forEach(function(widget) {
       widget.html('Bad Subscription');
     });
     delete this.widgets[data.id];
@@ -91,26 +96,10 @@
   };
 
 
-  /*WidgetController.prototype.buildSubsList = function(data) {
+  WidgetController.prototype.update = function(data) {
     console.log(data);
-    var self = this;
-    $('tr:gt(0)', self.el.subsList).remove();
-    var id = this.el.id.val();
-    var ids = [];
-    data.data.forEach(function(item) {
-      ids.push(item.id);
-    });
-    0 > ids.indexOf(id) && (id = ids[0]);
-    $.each(data.data, function(i, item) {
-      var row = self.el.row.clone();
-      var col = $('td:eq(0) input', row).val(item.id).attr('row', 1 + i);
-      item.id === id && col.attr('checked', 'checked');
-      $('td:eq(1)', row).text(item.id);
-      $('td:eq(2)', row).text(item.type.charAt(0).toUpperCase() + item.type.slice(1));
-      $('td:eq(3)', row).text('#' + item.object);
-      row.addClass(i % 2 ? 'even' : 'odd').appendTo(self.el.subsList);
-    });
-  };*/
+    
+  };
 
 
   $(function() {

@@ -22,7 +22,7 @@ function Sigma(params) {
       'aOnline', 'aExit', 'aGetSubscription'
     ],
     client: [
-      'aOnline', 'aExit', 'aBadSubscription'
+      'aOnline', 'aExit', 'aBadSubscription', 'aUpdate'
     ]
   };
 

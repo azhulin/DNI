@@ -40,11 +40,12 @@ function Logger(file) {
 }
 
 
-Logger.prototype.log = function(message) {
+Logger.prototype.log = function(message, depth) {
+  depth = depth || 1;
   var date = new Date().toISOString();
   var file = path.basename(__file);
   if (['Array', 'Object'].contains($.type(message))) {
-    message = util.inspect(message, false, 4);
+    message = util.inspect(message, false, depth);
   }
   message = '>>>> ' + date + ' ' + file + ':' + __line + '>\n' + message + '\n';
   fs.appendFile(this.file, message);

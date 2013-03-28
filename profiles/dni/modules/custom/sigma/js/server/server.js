@@ -28,21 +28,22 @@ else {
 
 //log(settings);
 
+global.subscriptions = {};
+var storageLimit = 20;
 var groups = [];
 var channels = {};
 var clients = {};
-global.subscriptions = [];
+var storage = {};
 var groupPermissions = {
   adminSettings: [ 'exit', 'getSubscription', 'postSubscription', 'deleteSubscription' ],
   widgetSettings: [ 'getSubscription' ],
   adminClient: [],
   client: []
 };
+var rooms = {
+  //getSubscription: [ 'adminSettings', 'widgetSettings' ]
 
-
-subscription.get(function(data) {
-  subscriptions = subscription.getList(data);
-});
+};
 
 
 function checkAccess(event, group) {
@@ -53,7 +54,6 @@ function checkAccess(event, group) {
 }
 
 
-server.listen(settings.port);
 io.sockets.on('connection', function(socket) {
 
   socket.on('disconnect', function() {
@@ -75,11 +75,14 @@ io.sockets.on('connection', function(socket) {
       if ('client' === group) {
         subs = subscription.filter(subs, socket);
         !subs.length && socket.disconnect();
+        subs.forEach(function(id) {
+          socket.join(id);
+        });
       }
 
       socket.group = group;
       groups.pushU(group);
-      socket.join(group);
+      //socket.join(group);
       if (!(group in clients)) {
         clients[group] = [];
       }
@@ -87,10 +90,14 @@ io.sockets.on('connection', function(socket) {
         subscriptions: subs,
         info: socket.handshake
       });
+      subs.forEach(function(id) {
+        io.sockets.in(id).emit('aUpdate', storage[id]);
+      });
+
     }
-    log(clients);
-    log(groups);
-    log(subscriptions);
+    //log(clients);
+    //log(groups);
+    //log(subscriptions);
   });
 
   socket.on('qExit', function() {
@@ -103,7 +110,6 @@ io.sockets.on('connection', function(socket) {
   socket.on('qGetSubscription', function() {
     if (checkAccess('getSubscription', socket.group)) {
       subscription.get(function(data) {
-        subscriptions = subscription.getList(data);
         socket.emit('aGetSubscription', data);
       });
     }
@@ -115,6 +121,8 @@ io.sockets.on('connection', function(socket) {
       subscription.post(data.object, data.object_id, function() {
         subscription.get(function(data) {
           io.sockets.emit('aGetSubscription', data);
+          //io.sockets.in('adminSettings').emit('aGetSubscription', data);
+          //io.sockets.in('widgetSettings').emit('aGetSubscription', data);
         });
         socket.emit('aPostSubscription', { status: 'OK' });
       });
@@ -126,6 +134,8 @@ io.sockets.on('connection', function(socket) {
       subscription.delete(data.type, data.param, function() {
         subscription.get(function(data) {
           io.sockets.emit('aGetSubscription', data);
+          //io.sockets.in('adminSettings').emit('aGetSubscription', data);
+          //io.sockets.in('widgetSettings').emit('aGetSubscription', data);
         });
         io.sockets.emit('aDeleteSubscription', { id: data.param });
       });
@@ -151,6 +161,7 @@ app.get('/listen', function(req, res) {
 
 
 app.post('/listen', function(req, res) {
+  log('have update');
   var data = '';
   req.on('data', function(chunk) {
     data += chunk;
@@ -158,8 +169,17 @@ app.post('/listen', function(req, res) {
   req.on('end', function() {
     data = JSON.parse(data);
     log(data);
-    data.forEach(function(item) {
-      getUpdates(item);
+    data.forEach(function(params) {
+      log('updating');
+      log(params);
+      getUpdates(params, function(data) {
+        log('received update');
+        log(params);
+        var id = params.subscription_id;
+        log(id);
+        log(storage);
+        io.sockets.in(id).emit('aUpdate', data);
+      });
     });
   });
 
@@ -168,18 +188,40 @@ app.post('/listen', function(req, res) {
 
 
 
+subscription.get(function() {
+  var ids = Object.keys(subscriptions);
+  var count = ids.length;
+  ids.forEach(function(id) {
+    var data = subscriptions[id];
+    var params = {
+      subscription_id: id,
+      object: data.object,
+      object_id: data.object_id
+    };
+    getUpdates(params, function(data) {
+      if (!--count) {
+        server.listen(settings.port);
+        io.sockets.in(id).emit('aUpdate', storage[id]);
+      }
+    });
+  });
+  log(subscriptions);
+});
 
 
 var min_tag_ids = {};
 
 
-function getUpdates(params) {
+
+
+
+
+function getUpdates(params, callback) {
   var min_tag_id = params.subscription_id in min_tag_ids ? min_tag_ids[params.subscription_id] : false;
   var query = {
     client_id: settings.client_id
   };
   min_tag_id && (query.min_tag_id = min_tag_id);
-  //https://api.instagram.com/v1/tags/test/media/recent?client_id=375c57455b054f8f9f349af431ca5a45
   var query = '?' + querystring.stringify(query);
 
   var options = {
@@ -196,17 +238,47 @@ function getUpdates(params) {
     });
     res.on('end', function() {
       data = JSON.parse(data);
-//log(data);
-      var result = [];
-      data.data.forEach(function(item) {
-        result.push(item.id);
-      });
-'min_tag_id' in data.pagination && (min_tag_ids[params.subscription_id] = data.pagination.min_tag_id);
-log(result);
-log(min_tag_ids);
-log(options.path);
-      //callback && callback(response);
+log(data.data, 3);
+      'min_tag_id' in data.pagination && (min_tag_ids[params.subscription_id] = data.pagination.min_tag_id);
+      log(min_tag_ids);
+      log(options.path);
+      storagePush(params, data.data, callback);
     });
   });
   req.end();
 }
+
+
+var toDelete = [
+  'attribution', 'filter', 'location', 'type'
+];
+
+
+function storageProcessItem(item) {
+  toDelete.forEach(function(prop) {
+    delete item[prop];
+  });
+  item.caption = item.caption.text;
+  item.comments = item.comments.count;
+  item.images.low_resolution = item.images.low_resolution.url;
+  item.images.standard_resolution = item.images.standard_resolution.url;
+  item.images.thumbnail = item.images.thumbnail.url;
+  item.likes = item.likes.count;
+  item.user = item.user.username;
+  return item;
+}
+
+
+function storagePush(params, data, callback) {
+  data = data.splice(-storageLimit, storageLimit);
+  var id = params.subscription_id;
+  !(id in storage) && (storage[id] = []);
+
+  data.forEach(function(item) {
+    item = storageProcessItem(item);
+    storageLimit < storage[id].length && storage[id].shift();
+    storage[id].push(item);
+  });
+  callback && callback(data);
+}
+

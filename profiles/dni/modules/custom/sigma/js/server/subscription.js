@@ -42,6 +42,7 @@ Subscription.prototype.post = function(object, object_id, callback) {
 
 
 Subscription.prototype.get = function(callback) {
+  global.subscriptions;
   var query = '?' + querystring.stringify({
     client_secret: settings.client_secret,
     client_id: settings.client_id
@@ -68,13 +69,19 @@ Subscription.prototype.get = function(callback) {
       else {
         response.status = 'OK';
         response.data = [];
+        var subs = {};
         data.data.forEach(function(item) {
+          subs[item.id] = {
+            object: item.object,
+            object_id: item.object_id
+          };
           response.data.push({
             type: item.object,
             object: item.object_id,
             id: item.id
           });
         });
+        subscriptions = subs;
       }
       callback && callback(response);
     });
@@ -116,27 +123,19 @@ Subscription.prototype.confirm = function(req, res) {
 };
 
 
-Subscription.prototype.getList = function(data) {
-  var result = [];
-  if (data && 'data' in data) {
-    data.data.forEach(function(item) {
-      result.push(item.id);
-    });
-  }
-  return result;
-};
-
-
 Subscription.prototype.filter = function(subs, socket) {
+  console.log(subs);
+  console.log(subscriptions);
   global.subscriptions;
   var filteredSubs = [];
   subs.forEach(function(item) {
-    if (subscriptions.contains(item)) {
+    if (item in subscriptions) {
       filteredSubs.pushU(item);
     }
     else {
       socket.emit('aBadSubscription', { id: item });
     }
   });
+  console.log(filteredSubs);
   return filteredSubs;
 };
