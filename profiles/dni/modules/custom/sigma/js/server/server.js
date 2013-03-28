@@ -77,6 +77,10 @@ io.sockets.on('connection', function(socket) {
         !subs.length && socket.disconnect();
         subs.forEach(function(id) {
           socket.join(id);
+          socket.emit('aUpdate', {
+            id: id,
+            data: storage[id]
+          });
         });
       }
 
@@ -90,14 +94,7 @@ io.sockets.on('connection', function(socket) {
         subscriptions: subs,
         info: socket.handshake
       });
-      subs.forEach(function(id) {
-        io.sockets.in(id).emit('aUpdate', storage[id]);
-      });
-
     }
-    //log(clients);
-    //log(groups);
-    //log(subscriptions);
   });
 
   socket.on('qExit', function() {
@@ -161,24 +158,19 @@ app.get('/listen', function(req, res) {
 
 
 app.post('/listen', function(req, res) {
-  log('have update');
   var data = '';
   req.on('data', function(chunk) {
     data += chunk;
   });
   req.on('end', function() {
     data = JSON.parse(data);
-    log(data);
     data.forEach(function(params) {
-      log('updating');
-      log(params);
       getUpdates(params, function(data) {
-        log('received update');
-        log(params);
         var id = params.subscription_id;
-        log(id);
-        log(storage);
-        io.sockets.in(id).emit('aUpdate', data);
+        io.sockets.in(id).emit('aUpdate', {
+          id: id,
+          data: data
+        });
       });
     });
   });
@@ -201,7 +193,10 @@ subscription.get(function() {
     getUpdates(params, function(data) {
       if (!--count) {
         server.listen(settings.port);
-        io.sockets.in(id).emit('aUpdate', storage[id]);
+        io.sockets.in(id).emit('aUpdate', {
+          id: id,
+          data: storage[id]
+        });
       }
     });
   });
@@ -210,11 +205,6 @@ subscription.get(function() {
 
 
 var min_tag_ids = {};
-
-
-
-
-
 
 function getUpdates(params, callback) {
   var min_tag_id = params.subscription_id in min_tag_ids ? min_tag_ids[params.subscription_id] : false;
@@ -238,7 +228,7 @@ function getUpdates(params, callback) {
     });
     res.on('end', function() {
       data = JSON.parse(data);
-log(data.data, 3);
+      //log(data.data, 3);
       'min_tag_id' in data.pagination && (min_tag_ids[params.subscription_id] = data.pagination.min_tag_id);
       log(min_tag_ids);
       log(options.path);
@@ -270,7 +260,7 @@ function storageProcessItem(item) {
 
 
 function storagePush(params, data, callback) {
-  data = data.splice(-storageLimit, storageLimit);
+  //data = data.splice(-storageLimit, storageLimit);
   var id = params.subscription_id;
   !(id in storage) && (storage[id] = []);
 

@@ -98,7 +98,8 @@
 
   WidgetController.prototype.update = function(data) {
     console.log(data);
-    
+    //150x150
+
   };
 
 
