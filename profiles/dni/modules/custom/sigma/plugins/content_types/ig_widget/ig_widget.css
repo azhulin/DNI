@@ -1,3 +1,7 @@
+.pane-ig-widget {
+  display: none;
+}
+
 .sigma-widget .sigma-content {
   border: 10px solid #000;
   border-radius: 10px;

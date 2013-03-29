@@ -29,7 +29,7 @@ else {
 //log(settings);
 
 global.subscriptions = {};
-var storageLimit = 100;
+var storageLimit = 64;
 var groups = [];
 var channels = {};
 var clients = {};
@@ -39,10 +39,6 @@ var groupPermissions = {
   widgetSettings: [ 'getSubscription' ],
   adminClient: [],
   client: []
-};
-var rooms = {
-  //getSubscription: [ 'adminSettings', 'widgetSettings' ]
-
 };
 
 
@@ -65,27 +61,25 @@ io.sockets.on('connection', function(socket) {
 
   socket.emit('aOnline', { status: 'OK' });
 
-  socket.on('qOnline', function(group, subs) {
+  socket.on('qOnline', function(group, data) {
     if (!(group in groupPermissions)) {
       socket.disconnect();
     }
     else {
-      subs = subs || [];
       if ('client' === group) {
-        subs = subscription.filter(subs, socket);
+        var subs = subscription.filter(Object.keys(data), socket);
         !subs.length && socket.disconnect();
         subs.forEach(function(id) {
           socket.join(id);
           socket.emit('aUpdate', {
             id: id,
-            data: storage[id]
+            data: storage[id].slice(-data[id])
           });
         });
       }
 
       socket.group = group;
       groups.pushU(group);
-      //socket.join(group);
       if (!(group in clients)) {
         clients[group] = [];
       }
@@ -109,7 +103,6 @@ io.sockets.on('connection', function(socket) {
         socket.emit('aGetSubscription', data);
       });
     }
-    //log(clients);
   });
 
   socket.on('qPostSubscription', function(data) {
@@ -117,8 +110,6 @@ io.sockets.on('connection', function(socket) {
       subscription.post(data.object, data.object_id, function() {
         subscription.get(function(data) {
           io.sockets.emit('aGetSubscription', data);
-          //io.sockets.in('adminSettings').emit('aGetSubscription', data);
-          //io.sockets.in('widgetSettings').emit('aGetSubscription', data);
         });
         socket.emit('aPostSubscription', { status: 'OK' });
       });
@@ -130,8 +121,6 @@ io.sockets.on('connection', function(socket) {
       subscription.delete(data.type, data.param, function() {
         subscription.get(function(data) {
           io.sockets.emit('aGetSubscription', data);
-          //io.sockets.in('adminSettings').emit('aGetSubscription', data);
-          //io.sockets.in('widgetSettings').emit('aGetSubscription', data);
         });
         io.sockets.emit('aDeleteSubscription', { id: data.param });
       });
