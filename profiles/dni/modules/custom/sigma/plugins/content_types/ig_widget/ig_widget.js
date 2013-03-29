@@ -90,7 +90,7 @@
   };
 
   WidgetController.prototype.update = function(data) {
-    console.log(data);
+    //console.log(data);
     var self = this;
     var widgets = this.widgets[data.id];
     widgets.forEach(function(conf) {
@@ -114,9 +114,17 @@
 
 
   WidgetController.prototype.newItem = function(conf, item) {
+    if (150 >= conf.size) {
+      var src = item.images.thumbnail;
+    }
+    else if (306 < conf.size) {
+      src = item.images.standard_resolution;
+    }
+    else {
+      src = item.images.low_resolution;
+    }
     var newItem = $('<a href="' + item.link + '" class="sigma-image" target="_blank">'
-        + '<img width="' + conf.size + '" height="' + conf.size + '" src="' + item.images.thumbnail + '"/>'
-        + '</a>');
+      + '<img width="' + conf.size + '" height="' + conf.size + '" src="' + src + '"/></a>');
     return newItem;
   };
 
