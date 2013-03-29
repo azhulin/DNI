@@ -38,7 +38,15 @@ function sigma_ig_widget_content_type_admin_info($subtype, $conf) {
 function sigma_ig_widget_content_type_render($subtype, $conf) {
   $block = new stdClass();
   $block->title = '';
-  $block->content = '<div class="sigma-widget" subscription="' . $conf['id'] . '">' . $conf['id'] . '</div>';
+  $block->content = '
+<div class="sigma-widget" sigma-subsid="' . $conf['id']
+  . '" sigma-size="' . $conf['size']
+  . '" sigma-columns="' . (1 + $conf['columns'])
+  . '" sigma-rows="' . (1 + $conf['rows'])
+  . '" sigma-animation="' . $conf['animation']
+  . '" sigma-color="#' . $conf['color'] . '">
+  <div class="sigma-content"></div>
+</div>';
   sigma_prepare_js();
   ctools_add_js('ig_widget', 'sigma', 'plugins/content_types/ig_widget');
   ctools_add_css('ig_widget', 'sigma', 'plugins/content_types/ig_widget');
@@ -83,6 +91,51 @@ function sigma_ig_widget_content_type_edit_form($form, &$form_state) {
     '#markup' => sigma_ig_widget_content_type_subscription_list(),
   );
 
+  $form['size'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Image size'),
+    '#default_value' => isset($conf['size']) ? $conf['size'] : 150,
+    '#required' => TRUE,
+    '#field_siffix' => 'px',
+    '#size' => 4,
+    '#maxlength' => 4,
+  );
+
+  $form['columns'] = array(
+    '#type' => 'select',
+    '#title' => t('Columns'),
+    '#options' => range(1, 20),
+    '#default_value' => isset($conf['columns']) ? $conf['columns'] : 3,
+  );
+
+  $form['rows'] = array(
+    '#type' => 'select',
+    '#title' => t('Rows'),
+    '#options' => range(1, 20),
+    '#default_value' => isset($conf['rows']) ? $conf['rows'] : 3,
+  );
+
+  $form['animation'] = array(
+    '#type' => 'select',
+    '#title' => t('Animation'),
+    '#options' => array(
+      'horizontal' => 'Horizontal',
+      'vertical' => 'Vertical',
+      'random' => 'Random',
+    ),
+    '#default_value' => isset($conf['animation']) ? $conf['animation'] : 0,
+  );
+
+  $form['color'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Color'),
+    '#default_value' => isset($conf['color']) ? $conf['color'] : '000000',
+    '#required' => TRUE,
+    '#field_prefix' => '#',
+    '#size' => 6,
+    '#maxlength' => 6,
+  );
+
   $form += sigma_render_status();
 
   sigma_prepare_js();
@@ -119,7 +172,7 @@ function sigma_ig_widget_content_type_subscription_list() {
  * The submit form stores the data in $conf.
  */
 function sigma_ig_widget_content_type_edit_form_submit($form, &$form_state) {
-  foreach (array('id', 'type', 'object') as $key) {
+  foreach (array('id', 'type', 'object', 'size', 'columns', 'rows', 'animation', 'color') as $key) {
     $form_state['conf'][$key] = check_plain($form_state['values'][$key]);
   }
 }

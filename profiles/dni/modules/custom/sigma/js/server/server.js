@@ -5,7 +5,7 @@ var express = require('express')
   , url = require('url')
   , app = express()
   , server = http.createServer(app)
-  , io = require('socket.io').listen(server)
+  , io = require('socket.io').listen(server, { log: false })
   , Subscription = require('./subscription')
   , subscription = new Subscription()
   , settings = require('./settings')
@@ -29,7 +29,7 @@ else {
 //log(settings);
 
 global.subscriptions = {};
-var storageLimit = 20;
+var storageLimit = 100;
 var groups = [];
 var channels = {};
 var clients = {};
@@ -57,7 +57,6 @@ function checkAccess(event, group) {
 io.sockets.on('connection', function(socket) {
 
   socket.on('disconnect', function() {
-    log(socket.group);
     if ('group' in socket) {
       clients[socket.group].splice(clients[socket.group].indexOf(socket), 1);
       // UPDATE CLIENT LIST
@@ -163,14 +162,18 @@ app.post('/listen', function(req, res) {
     data += chunk;
   });
   req.on('end', function() {
+//log(req.headers['x-hub-signature']);
+//log(req.headers);
     data = JSON.parse(data);
     data.forEach(function(params) {
       getUpdates(params, function(data) {
-        var id = params.subscription_id;
-        io.sockets.in(id).emit('aUpdate', {
-          id: id,
-          data: data
-        });
+        if (data) {
+          var id = params.subscription_id;
+          io.sockets.in(id).emit('aUpdate', {
+            id: id,
+            data: data
+          });
+        }
       });
     });
   });
@@ -200,20 +203,36 @@ subscription.get(function() {
       }
     });
   });
-  log(subscriptions);
 });
 
 
-var min_tag_ids = {};
+var updateInfo = {};
 
 function getUpdates(params, callback) {
-  var min_tag_id = params.subscription_id in min_tag_ids ? min_tag_ids[params.subscription_id] : false;
+  var id = params.subscription_id;
+  if (id in updateInfo) {
+    var time = +new Date;
+    if (updateInfo[id].time + 2000 > time) {
+      //log('Skip ' + id);
+      return updateInfo[id].min_tag_id = false;
+    }
+    //log('Pass ' + id);
+    updateInfo[id].time = time;
+  }
+  else {
+    //log('New sub ' + id);
+    updateInfo[id] = {
+      time: +new Date,
+      min_tag_id: false
+    };
+  }
+
   var query = {
     client_id: settings.client_id
   };
-  min_tag_id && (query.min_tag_id = min_tag_id);
+  updateInfo[id].min_tag_id && (query.min_tag_id = updateInfo[id].min_tag_id);
   var query = '?' + querystring.stringify(query);
-
+//https://api.instagram.com/v1/tags/drupaltest/media/recent?client_id=375c57455b054f8f9f349af431ca5a45
   var options = {
     host: 'api.instagram.com',
     port: 443,
@@ -227,11 +246,16 @@ function getUpdates(params, callback) {
       data += chunk;
     });
     res.on('end', function() {
-      data = JSON.parse(data);
-      //log(data.data, 3);
-      'min_tag_id' in data.pagination && (min_tag_ids[params.subscription_id] = data.pagination.min_tag_id);
-      log(min_tag_ids);
-      log(options.path);
+      log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ' + res.headers['x-ratelimit-remaining'] + '/5000');
+      try {
+        data = JSON.parse(data);
+      }
+      catch(e) {
+        log('Parse error');
+        //log(data);
+        return false;
+      }
+      'min_tag_id' in data.pagination && (updateInfo[id].min_tag_id = data.pagination.min_tag_id);
       storagePush(params, data.data, callback);
     });
   });
@@ -248,7 +272,7 @@ function storageProcessItem(item) {
   toDelete.forEach(function(prop) {
     delete item[prop];
   });
-  item.caption = item.caption.text;
+  item.caption = item.caption ? item.caption.text : '';
   item.comments = item.comments.count;
   item.images.low_resolution = item.images.low_resolution.url;
   item.images.standard_resolution = item.images.standard_resolution.url;
@@ -264,11 +288,11 @@ function storagePush(params, data, callback) {
   var id = params.subscription_id;
   !(id in storage) && (storage[id] = []);
 
-  data.forEach(function(item) {
+  data.reverse().forEach(function(item) {
     item = storageProcessItem(item);
     storageLimit < storage[id].length && storage[id].shift();
     storage[id].push(item);
   });
+  10 < data.length && (data = data.splice(-2, 2));
   callback && callback(data);
 }
-

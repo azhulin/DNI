@@ -60,7 +60,15 @@ Subscription.prototype.get = function(callback) {
       data += chunk;
     });
     res.on('end', function() {
-      data = JSON.parse(data);
+console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ' + res.headers['x-ratelimit-remaining'] + '/5000');
+      try {
+        data = JSON.parse(data);
+      }
+      catch(e) {
+        log('Parse error');
+        //log(data);
+        return false;
+      }
       var response = {};
       if (200 !== data.meta.code) {
         response.status = 'error';
@@ -124,8 +132,6 @@ Subscription.prototype.confirm = function(req, res) {
 
 
 Subscription.prototype.filter = function(subs, socket) {
-  console.log(subs);
-  console.log(subscriptions);
   global.subscriptions;
   var filteredSubs = [];
   subs.forEach(function(item) {
@@ -136,6 +142,5 @@ Subscription.prototype.filter = function(subs, socket) {
       socket.emit('aBadSubscription', { id: item });
     }
   });
-  console.log(filteredSubs);
   return filteredSubs;
 };

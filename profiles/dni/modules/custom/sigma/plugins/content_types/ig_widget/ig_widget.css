@@ -1,0 +1,29 @@
+.sigma-widget .sigma-content {
+  border: 10px solid #000;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  width: 0;
+}
+
+.sigma-widget .sigma-content .sigma-image {
+  position: absolute;
+}
+
+.sigma-widget .sigma-content .sigma-image img {
+  display: block;
+}
+
+.sigma-widget .sigma-content .sigma-user {
+  background-color: #FF0;
+  bottom: 0;
+  color: #000;
+  font-family: arial;
+  font-size: 10px;
+  left: 0;
+  opacity: 0.4;
+  position: absolute;
+  text-align: center;
+  text-transform: uppercase;
+  width: 100%;
+}
