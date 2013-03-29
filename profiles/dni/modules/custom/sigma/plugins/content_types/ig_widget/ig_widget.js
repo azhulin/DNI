@@ -4,6 +4,7 @@
     var self = this;
     this.widgets = {};
     this.data = {};
+    this.slowAnimSpeed = 2400;
     $('.sigma-widget').each(function() {
       var id = $(this).attr('sigma-subsid');
       if (!(id in self.widgets)) {
@@ -26,8 +27,10 @@
       self.widgets[id].push(conf);
       var count = conf.columns * conf.rows;
       count > self.data[id] && (self.data[id] = count);
+      var color = $(this).attr('sigma-color');
       $('.sigma-content', this).css({
-        borderColor: $(this).attr('sigma-color'),
+        backgroundColor: color,
+        borderColor: color,
         height: conf.size * conf.rows,
         width: conf.size * conf.columns
       });
@@ -69,7 +72,7 @@
 
   WidgetController.prototype.isOnline = function() {
     console.log('Server online');
-    $('.pane-ig-widget').show();
+    $('.pane-ig-widget').fadeIn(this.slowAnimSpeed);
   };
 
 
@@ -110,15 +113,21 @@
   };
 
 
+  WidgetController.prototype.newItem = function(conf, item) {
+    var newItem = $('<a href="' + item.link + '" class="sigma-image" target="_blank">'
+        + '<img width="' + conf.size + '" height="' + conf.size + '" src="' + item.images.thumbnail + '"/>'
+        + '</a>');
+    return newItem;
+  };
+
+
   WidgetController.prototype.animateHorizontal = function(conf, item) {
     var items = $('.sigma-content a', conf.target);
     var count = items.length;
     !conf.pos-- && (conf.pos = conf.rows - 1);
     var x = -conf.size;
     var y = conf.pos * conf.size;
-    var newItem = $('<a href="' + item.link + '" class="sigma-image" target="_blank">'
-        + '<img width="' + conf.size + '" height="' + conf.size + '" src="' + item.images.thumbnail + '"/>'
-        + '<span class="sigma-user">' + item.user + '</span></a>')
+    var newItem = this.newItem(conf, item)
       .css({ left: x, top: y });
     conf.target.find('.sigma-content').append(newItem);
     !y && items.add(newItem).stop(true, true).animate({ left: '+=' + conf.size }, 'slow');
@@ -132,9 +141,7 @@
     !conf.pos-- && (conf.pos = conf.columns - 1);
     var x = conf.pos * conf.size;
     var y = -conf.size;
-    var newItem = $('<a href="' + item.link + '" class="sigma-image" target="_blank">'
-        + '<img width="' + conf.size + '" height="' + conf.size + '" src="' + item.images.thumbnail + '"/>'
-        + '<span class="sigma-user">' + item.user + '</span></a>')
+    var newItem = this.newItem(conf, item)
       .css({ left: x, top: y });
     conf.target.find('.sigma-content').append(newItem);
     !x && items.add(newItem).stop(true, true).animate({ top: '+=' + conf.size }, 'slow');
@@ -145,21 +152,22 @@
   WidgetController.prototype.animateRandom = function(conf, item) {
     var items = $('.sigma-content a', conf.target);
     var count = items.length;
-
+    var newItem = this.newItem(conf, item);
     if (conf.columns * conf.rows > count) {
       !conf.pos-- && (conf.pos = conf.columns - 1);
       var x = conf.pos * conf.size;
       var y = -conf.size;
-      var newItem = $('<a href="' + item.link + '" class="sigma-image" target="_blank">'
-          + '<img width="' + conf.size + '" height="' + conf.size + '" src="' + item.images.thumbnail + '"/>'
-          + '<span class="sigma-user">' + item.user + '</span></a>')
-        .css({ left: x, top: y });
+      newItem.css({ left: x, top: y });
       conf.target.find('.sigma-content').append(newItem);
       !x && items.add(newItem).stop(true, true).animate({ top: '+=' + conf.size }, 0);
     }
     else {
-      var rand = Math.floor(Math.random() * (conf.columns * conf.rows + 1));
-      console.log(rand);
+      var target = items.eq(Math.floor(Math.random() * (conf.columns * conf.rows)));
+      var pos = target.position();
+      newItem.hide().css({ left: pos.left, top: pos.top }).insertAfter(target).fadeIn(this.slowAnimSpeed);
+      target.fadeOut(this.slowAnimSpeed, function() {
+        $(this).remove();
+      });
     }
   };
 
