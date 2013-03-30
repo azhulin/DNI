@@ -38,14 +38,10 @@ dependencies[] = admin_menu
 dependencies[] = admin_menu_toolbar
 ; Other
 dependencies[] = module_filter
-; Views
-dependencies[] = views
-dependencies[] = views_ui
 ; Chaos tool suite
 dependencies[] = ctools
 dependencies[] = page_manager
 dependencies[] = ctools_custom_content
-dependencies[] = views_content
 ; Panels
 dependencies[] = panels
 dependencies[] = panels_mini
