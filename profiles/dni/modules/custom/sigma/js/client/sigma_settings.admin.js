@@ -97,7 +97,6 @@
     this.sigma.online();
     this.el.stop.show();
     this.el.start.hide();
-    this.sigma.getSubscription();
   };
 
 

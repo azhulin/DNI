@@ -1,7 +1,7 @@
 function Sigma(params) {
   var callbacks = params.callbacks;
   var group = params.group;
-  var subscriptions = 'subscriptions' in params ? params.subscriptions : [];
+  var subscriptions = 'subscriptions' in params ? params.subscriptions : {};
 
   if (!('sigma' in Drupal.settings) || !('host' in Drupal.settings.sigma)) {
     return;
@@ -17,6 +17,9 @@ function Sigma(params) {
   var events = {
     adminSettings: [
       'aOnline', 'aExit', 'aGetSubscription', 'aPostSubscription', 'aDeleteSubscription'
+    ],
+    adminClients: [
+      'aOnline', 'aExit', 'aGetClient'
     ],
     widgetSettings: [
       'aOnline', 'aExit', 'aGetSubscription'
@@ -54,11 +57,6 @@ Sigma.prototype.init = function() {
 
 Sigma.prototype.exit = function() {
   this.socket.emit('qExit');
-};
-
-
-Sigma.prototype.getSubscription = function() {
-  this.socket.emit('qGetSubscription');
 };
 
 

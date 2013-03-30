@@ -90,7 +90,7 @@
   };
 
   WidgetController.prototype.update = function(data) {
-    //console.log(data);
+    console.log(data);
     var self = this;
     var widgets = this.widgets[data.id];
     widgets.forEach(function(conf) {

@@ -11,6 +11,8 @@ var express = require('express')
   , storage = new Storage({ limit: 64 })
   , Subscription = require('./subscription')
   , subscription = new Subscription(storage)
+  , Client = require('./client')
+  , client = new Client()
   ;
 
 http.globalAgent.maxSockets = 1000;
@@ -27,11 +29,10 @@ else {
 }
 
 var groups = [];
-var clients = {};
 var groupPermissions = {
   adminSettings: [ 'exit', 'getSubscription', 'postSubscription', 'deleteSubscription' ],
+  adminClients: [ 'getClient' ],
   widgetSettings: [ 'getSubscription' ],
-  adminClient: [],
   client: []
 };
 
@@ -47,35 +48,48 @@ function checkAccess(event, group) {
 io.sockets.on('connection', function(socket) {
   socket.on('disconnect', function() {
     if ('group' in socket) {
-      clients[socket.group].splice(clients[socket.group].indexOf(socket), 1);
-      // UPDATE CLIENT LIST
+      client.delete(socket.id, socket.group);
+      io.sockets.in('adminClients').emit('aGetClient', client.get());
     }
   });
 
   socket.on('qOnline', function(group, data) {
     if (group in groupPermissions) {
-      if ('client' === group) {
-        var subs = subscription.filter(Object.keys(data), function(item) {
-          socket.emit('aBadSubscription', { id: item });
-        });
-        !subs.length && socket.disconnect();
-        subs.forEach(function(id) {
-          socket.join(id);
-          socket.emit('aUpdate', {
-            id: id,
-            data: storage.pop(id, data[id])
-          });
-        });
-      }
       socket.group = group;
       groups.pushU(group);
-      if (!(group in clients)) {
-        clients[group] = [];
-      }
-      clients[group].push({
-        subscriptions: subs,
-        info: socket.handshake
+      client.add(socket.id, group, socket.handshake, data, function() {
+        io.sockets.in('adminClients').emit('aGetClient', client.get());
       });
+      switch (group) {
+        case 'adminSettings':
+        case 'widgetSettings':
+          subscription.get(function(data) {
+            socket.emit('aGetSubscription', data);
+          });
+          break;
+
+        case 'adminClients':
+          socket.join(group);
+          socket.emit('aGetClient', client.get());
+          break;
+
+        case 'client':
+          var subs = subscription.filter(Object.keys(data), function(item) {
+            socket.emit('aBadSubscription', { id: item });
+          });
+          if (!subs.length) {
+            client.delete(socket.id, socket.group);
+            socket.disconnect();
+          }
+          subs.forEach(function(id) {
+            socket.join(id);
+            socket.emit('aUpdate', {
+              id: id,
+              data: storage.pop(id, data[id])
+            });
+          });
+          break;
+      }
     }
     else {
       socket.disconnect();
@@ -86,14 +100,6 @@ io.sockets.on('connection', function(socket) {
     if (checkAccess('exit', socket.group)) {
       io.sockets.emit('aExit', { status: 'OK' });
       process.exit();
-    }
-  });
-
-  socket.on('qGetSubscription', function() {
-    if (checkAccess('getSubscription', socket.group)) {
-      subscription.get(function(data) {
-        socket.emit('aGetSubscription', data);
-      });
     }
   });
 
@@ -162,10 +168,6 @@ subscription.get(function() {
     subscription.getUpdate(params, function(data) {
       if (!--count) {
         server.listen(settings.port);
-        io.sockets.in(id).emit('aUpdate', {
-          id: id,
-          data: storage[id]
-        });
       }
     });
   });

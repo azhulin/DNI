@@ -1,7 +1,8 @@
 #edit-status,
 #edit-server-stop,
 #edit-subs,
-#edit-subs-new {
+#edit-subs-new,
+#client-list {
   display: none;
 }
 

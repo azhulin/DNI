@@ -58,7 +58,7 @@
 
   WidgetAdminController.prototype.isOnline = function() {
     this.sigma.online();
-    this.sigma.getSubscription();
+    //this.sigma.getSubscription();
   };
 
 

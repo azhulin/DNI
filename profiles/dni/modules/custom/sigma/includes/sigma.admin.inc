@@ -221,15 +221,16 @@ function sigma_clients_form() {
 function sigma_clients_form_client_list() {
   $vars = array(
     'header' => array(
-      t('Subscription ID'),
-      t('Type'),
-      t('Tag'),
-      t('Action'),
+      t('IP'),
+      t('Group'),
+      t('Path'),
+      t('User Agent'),
+      t('Subscriptions'),
     ),
     'rows' => array(
-      array('', '', '', l(t('Delete'), '', array('attributes' => array('class' => 'button'))))
+      array('', '', '', '', '')
     ),
-    'attributes' => array('id' => 'subscription-list'),
+    'attributes' => array('id' => 'client-list'),
   );
   $content = theme('table', $vars);
 
