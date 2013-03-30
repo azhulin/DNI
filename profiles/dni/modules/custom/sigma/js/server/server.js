@@ -10,7 +10,6 @@ var express = require('express')
   , subscription = new Subscription()
   , settings = require('./settings')
   , $ = require('./$')
-  //, AccessCard = require('./access_card')
   ;
 
 http.globalAgent.maxSockets = 1000;
@@ -25,8 +24,6 @@ if (settings.debug) {
 else {
   log = function() {};
 }
-
-//log(settings);
 
 global.subscriptions = {};
 var storageLimit = 64;
