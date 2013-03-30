@@ -196,7 +196,7 @@ Subscription.prototype.getUpdate = function(params, callback) {
         data = JSON.parse(data);
       }
       catch(e) {
-        log('Parse error');
+        console.log('Parse error');
         return false;
       }
       'min_tag_id' in data.pagination && (self.updateInfo[id].min_tag_id = data.pagination.min_tag_id);

@@ -40,7 +40,7 @@ function sigma_menu() {
   );
 
   $items['admin/config/services/sigma/settings'] = array(
-    'title' => 'Sigma Instagram Settings',
+    'title' => 'Settings',
     'description' => t('Sigma Instagram settings.'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('sigma_settings_form'),
@@ -51,17 +51,17 @@ function sigma_menu() {
     'weight' => 0,
   );
 
-  //$items['admin/config/services/sigma/settings'] = array(
-  //  'title' => 'Instagram',
-  //  'description' => t('Instagram settings form.'),
-  //  'page callback' => 'drupal_get_form',
-  //  'page arguments' => array('sigma_settings_form'),
-  //  'access callback' => 'user_access',
-  //  'access arguments' => array('administer sigma instagram'),
-  //  'type' => MENU_LOCAL_TASK,
-  //  'file' => 'includes/sigma.admin.inc',
-  //  'weight' => 1,
-  //);
+  $items['admin/config/services/sigma/clients'] = array(
+    'title' => 'Online Clients',
+    'description' => t('List of online clients.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sigma_clients_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer sigma instagram'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/sigma.admin.inc',
+    'weight' => 1,
+  );
 
   return $items;
 }

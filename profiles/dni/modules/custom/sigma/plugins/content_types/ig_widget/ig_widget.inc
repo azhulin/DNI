@@ -87,6 +87,8 @@ function sigma_ig_widget_content_type_edit_form($form, &$form_state) {
     '#required' => TRUE,
   );
 
+  $form += sigma_render_status();
+
   $form['subs_list'] = array(
     '#markup' => sigma_ig_widget_content_type_subscription_list(),
   );
@@ -135,8 +137,6 @@ function sigma_ig_widget_content_type_edit_form($form, &$form_state) {
     '#size' => 6,
     '#maxlength' => 6,
   );
-
-  $form += sigma_render_status();
 
   sigma_prepare_js();
   ctools_add_js('ig_widget.admin', 'sigma', 'plugins/content_types/ig_widget');

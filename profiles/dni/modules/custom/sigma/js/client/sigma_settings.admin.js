@@ -1,6 +1,6 @@
 (function($) {
 
-  function AdminController() {
+  function AdminSettingsController() {
     this.el = {
       start: $('#edit-server-start'),
       stop: $('#edit-server-stop'),
@@ -16,33 +16,33 @@
   }
 
 
-  AdminController.prototype.init = function(ac) {
+  AdminSettingsController.prototype.init = function(self) {
     this.sigma = new Sigma({
       group: 'adminSettings',
       callbacks: {
         aOnline: {
           success: function(data) {
-            ac.isOnline(data);
+            self.isOnline(data);
           }
         },
         aExit: {
           success: function(data) {
-            ac.isOffline(data);
+            self.isOffline(data);
           }
         },
         aGetSubscription: {
           success: function(data) {
-            ac.refreshSubsList(data);
+            self.refreshSubsList(data);
           }
         },
         aPostSubscription: {
           success: function(data) {
-            ac.subsWasAdded(data);
+            self.subsWasAdded(data);
           }
         },
         aDeleteSubscription: {
           success: function(data) {
-            ac.informDeletion(data);
+            self.informDeletion(data);
           }
         }
       }
@@ -51,7 +51,7 @@
   };
 
 
-  AdminController.prototype.start = function() {
+  AdminSettingsController.prototype.start = function() {
     console.log('START');
     var self = this;
     this.sigma.status.show();
@@ -86,14 +86,14 @@
   };
 
 
-  AdminController.prototype.subsWasAdded = function() {
+  AdminSettingsController.prototype.subsWasAdded = function() {
     this.el.subsNewCancel.click();
     this.el.subsNewObject.val('');
     this.setMessage(Drupal.t('Subscription was successfully created.'));
   };
 
 
-  AdminController.prototype.isOnline = function() {
+  AdminSettingsController.prototype.isOnline = function() {
     this.sigma.online();
     this.el.stop.show();
     this.el.start.hide();
@@ -101,7 +101,7 @@
   };
 
 
-  AdminController.prototype.isOffline = function() {
+  AdminSettingsController.prototype.isOffline = function() {
     this.sigma.offline();
     this.el.subs.hide();
     this.el.stop.hide();
@@ -109,13 +109,13 @@
   };
 
 
-  AdminController.prototype.refreshSubsList = function(data) {
+  AdminSettingsController.prototype.refreshSubsList = function(data) {
     this.buildSubsList(data);
     this.el.subs.show();
   };
 
 
-  AdminController.prototype.buildSubsList = function(data) {
+  AdminSettingsController.prototype.buildSubsList = function(data) {
     console.log(data);
     var self = this;
     $('tr:gt(0)', self.el.subsList).remove();
@@ -133,12 +133,12 @@
   };
 
 
-  AdminController.prototype.informDeletion = function(data) {
+  AdminSettingsController.prototype.informDeletion = function(data) {
     this.setMessage(Drupal.t('Subscription "' + data.id + '" was deleted.'));
   };
 
 
-  AdminController.prototype.getSubsObject = function() {
+  AdminSettingsController.prototype.getSubsObject = function() {
     var value = $.trim(this.el.subsNewObject.val());
     if (!value) {
       this.setMessage(Drupal.t('Invalid tag.'), 'error');
@@ -148,7 +148,7 @@
   };
 
 
-  AdminController.prototype.setMessage = function(message, type) {
+  AdminSettingsController.prototype.setMessage = function(message, type) {
     $('#console').remove();
     type = type || 'status';
     $('<div class="clearfix" id="console"><div class="messages ' + type + '">'
@@ -157,7 +157,7 @@
 
 
   $(function() {
-    var self = new AdminController();
+    var self = new AdminSettingsController();
     self.init(self);
   });
 

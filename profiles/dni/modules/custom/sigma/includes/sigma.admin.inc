@@ -2,7 +2,7 @@
 
 
 /**
- * Form constructor for Node.js server settings form.
+ * Form constructor for settings form.
  */
 function sigma_settings_form() {
   global $drupal_hash_salt;
@@ -122,15 +122,9 @@ function sigma_settings_form() {
     '#value' => t('Stop Server'),
   );
 
-  $form['#attached']['css'] = array(
-    drupal_get_path('module', 'sigma') . '/css/sigma_admin.css',
-  );
-
-  $form['#attached']['js'] = array(
-    drupal_get_path('module', 'sigma') . '/js/client/sigma_admin.js',
-  );
-
   sigma_prepare_js();
+  ctools_add_js('sigma_settings.admin', 'sigma', 'js/client');
+  ctools_add_css('sigma.admin', 'sigma', 'css');
 
   return $form;
 }
@@ -183,6 +177,48 @@ function sigma_settings_form_submit($form, &$form_state) {
  * Renders subscription list table.
  */
 function sigma_settings_form_subscription_list() {
+  $vars = array(
+    'header' => array(
+      t('Subscription ID'),
+      t('Type'),
+      t('Tag'),
+      t('Action'),
+    ),
+    'rows' => array(
+      array('', '', '', l(t('Delete'), '', array('attributes' => array('class' => 'button'))))
+    ),
+    'attributes' => array('id' => 'subscription-list'),
+  );
+  $content = theme('table', $vars);
+
+  return $content;
+}
+
+
+/**
+ * Form constructor for clients form.
+ */
+function sigma_clients_form() {
+  $form = array();
+
+  $form += sigma_render_status();
+
+  $form['clients'] = array(
+    '#markup' => sigma_clients_form_client_list(),
+  );
+
+  sigma_prepare_js();
+  ctools_add_js('sigma_clients.admin', 'sigma', 'js/client');
+  ctools_add_css('sigma.admin', 'sigma', 'css');
+
+  return $form;
+}
+
+
+/**
+ * Renders client list table.
+ */
+function sigma_clients_form_client_list() {
   $vars = array(
     'header' => array(
       t('Subscription ID'),
