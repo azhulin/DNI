@@ -81,12 +81,6 @@ class Sigma {
         'host=' . $this->node_host,
         'port=' . $this->node_port,
       );
-      $debug = variable_get('node_server_debug_mode', 0);
-      $log_file = variable_get('node_server_log_file');
-      if ($debug && $log_file) {
-        $args[] = 'debug=1';
-        $args[] = 'log_file=' . $log_file;
-      }
       foreach ($args as &$arg) {
         $arg = escapeshellarg($arg);
       }

@@ -15,18 +15,8 @@ var express = require('express')
   , client = new Client()
   ;
 
-http.globalAgent.maxSockets = 1000;
 
-if (settings.debug) {
-  var Logger = require('./logger');
-  var logger = new Logger(settings.log_file);
-  var log = function(message) {
-    logger.log(message);
-  };
-}
-else {
-  log = function() {};
-}
+http.globalAgent.maxSockets = 1000;
 
 var groupPermissions = {
   adminSettings: [ 'exit', 'getSubscription', 'postSubscription', 'deleteSubscription' ],

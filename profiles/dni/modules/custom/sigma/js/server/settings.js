@@ -8,7 +8,7 @@ function define(name, value) {
 }
 
 var allowed = [
-  'drupal_url', 'host', 'port', 'client_id', 'client_secret', 'debug', 'log_file'
+  'drupal_url', 'host', 'port', 'client_id', 'client_secret'
 ];
 
 process.argv.forEach(function(value, index, array) {

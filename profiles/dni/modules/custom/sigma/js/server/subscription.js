@@ -71,7 +71,7 @@ Subscription.prototype.get = function(callback) {
         data = JSON.parse(data);
       }
       catch(e) {
-        log('Parse error');
+        console.log('Parse error');
         return false;
       }
       var response = {};
