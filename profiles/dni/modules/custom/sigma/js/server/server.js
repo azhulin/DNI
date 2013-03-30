@@ -26,7 +26,6 @@ else {
   log = function() {};
 }
 
-global.subscriptions = {};
 var groups = [];
 var clients = {};
 var groupPermissions = {
@@ -151,10 +150,10 @@ app.post('/listen', function(req, res) {
 
 
 subscription.get(function() {
-  var ids = Object.keys(subscriptions);
+  var ids = subscription.getIds();
   var count = ids.length;
   ids.forEach(function(id) {
-    var data = subscriptions[id];
+    var data = subscription.getById(id);
     var params = {
       subscription_id: id,
       object: data.object,

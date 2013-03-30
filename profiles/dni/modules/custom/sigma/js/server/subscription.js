@@ -13,6 +13,7 @@ function Subscription(storage) {
   this.storage = storage;
   this.host = 'api.instagram.com';
   this.subsPath = '/v1/subscriptions';
+  this.subscriptions = {};
 }
 
 
@@ -47,7 +48,7 @@ Subscription.prototype.post = function(object, object_id, callback) {
 
 
 Subscription.prototype.get = function(callback) {
-  global.subscriptions;
+  var self = this;
   var query = '?' + querystring.stringify({
     client_secret: settings.client_secret,
     client_id: settings.client_id
@@ -93,7 +94,7 @@ Subscription.prototype.get = function(callback) {
             id: item.id
           });
         });
-        subscriptions = subs;
+        self.subscriptions = subs;
       }
       callback && callback(response);
     });
@@ -206,11 +207,26 @@ Subscription.prototype.getUpdate = function(params, callback) {
 };
 
 
+Subscription.prototype.getIds = function() {
+  return Object.keys(this.subscriptions);
+};
+
+
+Subscription.prototype.getById = function(id) {
+  if (id in this.subscriptions) {
+    return this.subscriptions[id];
+  }
+  else {
+    return null;
+  }
+};
+
+
 Subscription.prototype.filter = function(subs, callback) {
-  global.subscriptions;
+  var self = this;
   var filteredSubs = [];
   subs.forEach(function(item) {
-    if (item in subscriptions) {
+    if (item in self.subscriptions) {
       filteredSubs.pushU(item);
     }
     else {
