@@ -74,7 +74,6 @@
 
 
   WidgetAdminController.prototype.buildSubsList = function(data) {
-    console.log(data);
     var self = this;
     $('tr:gt(0)', self.el.subsList).remove();
     var id = this.el.id.val();

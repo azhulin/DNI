@@ -5,8 +5,6 @@
  * Form constructor for settings form.
  */
 function sigma_settings_form() {
-  global $drupal_hash_salt;
-
   $form = array();
 
   $form['instagram'] = array(

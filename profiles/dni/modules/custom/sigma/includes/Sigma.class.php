@@ -33,7 +33,6 @@ class Sigma {
     if (empty(self::$instance)) {
       self::$instance = new Sigma();
     }
-
     return self::$instance;
   }
 
@@ -47,10 +46,8 @@ class Sigma {
         'host' => 'http://' . $this->node_host . ':' . $this->node_port . '/',
       );
       drupal_add_js(array('sigma' => $settings), 'setting');
-
       return TRUE;
     }
-
     return FALSE;
   }
 

@@ -1,4 +1,4 @@
-; Packaging information for dni
+; Packaging information for DNI
 name = "DNI"
 description = "DNI install profile."
 exclusive = "1"

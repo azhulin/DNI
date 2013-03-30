@@ -38,7 +38,6 @@
 
 
   AdminClientController.prototype.start = function() {
-    console.log('START');
     this.sigma.status.show();
     this.row = $('tr:last', this.list).attr('class', '').detach();
   };
@@ -68,10 +67,8 @@
 
 
   AdminClientController.prototype.buildList = function(data) {
-    console.log(data);
     var self = this;
     $('tr:gt(0)', self.list).remove();
-
     var i = 0;
     Object.keys(data).forEach(function(group) {
       Object.keys(data[group]).forEach(function(id) {

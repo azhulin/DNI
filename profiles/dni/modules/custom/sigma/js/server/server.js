@@ -28,7 +28,6 @@ else {
   log = function() {};
 }
 
-var groups = [];
 var groupPermissions = {
   adminSettings: [ 'exit', 'getSubscription', 'postSubscription', 'deleteSubscription' ],
   adminClients: [ 'getClient' ],
@@ -56,7 +55,6 @@ io.sockets.on('connection', function(socket) {
   socket.on('qOnline', function(group, data) {
     if (group in groupPermissions) {
       socket.group = group;
-      groups.pushU(group);
       client.add(socket.id, group, socket.handshake, data, function() {
         io.sockets.in('adminClients').emit('aGetClient', client.get());
       });

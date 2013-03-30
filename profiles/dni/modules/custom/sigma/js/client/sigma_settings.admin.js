@@ -52,7 +52,6 @@
 
 
   AdminSettingsController.prototype.start = function() {
-    console.log('START');
     var self = this;
     this.sigma.status.show();
 
@@ -115,7 +114,6 @@
 
 
   AdminSettingsController.prototype.buildSubsList = function(data) {
-    console.log(data);
     var self = this;
     $('tr:gt(0)', self.el.subsList).remove();
     $.each(data.data, function(i, item) {

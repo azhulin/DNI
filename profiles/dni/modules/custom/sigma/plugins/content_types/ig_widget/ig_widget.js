@@ -35,7 +35,6 @@
         width: conf.size * conf.columns
       });
     });
-    console.log(this.widgets);
   }
 
 
@@ -71,7 +70,6 @@
 
 
   WidgetController.prototype.isOnline = function() {
-    console.log('Server online');
     $('.pane-ig-widget').fadeIn(this.slowAnimSpeed);
   };
 
@@ -90,7 +88,6 @@
   };
 
   WidgetController.prototype.update = function(data) {
-    console.log(data);
     var self = this;
     var widgets = this.widgets[data.id];
     widgets.forEach(function(conf) {
