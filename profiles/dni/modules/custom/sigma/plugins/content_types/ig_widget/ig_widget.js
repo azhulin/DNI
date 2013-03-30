@@ -170,9 +170,12 @@
       !x && items.add(newItem).stop(true, true).animate({ top: '+=' + conf.size }, 0);
     }
     else {
-      var target = items.eq(Math.floor(Math.random() * (conf.columns * conf.rows)));
+      var target = items.not(':animated');
+      target = target.eq(Math.floor(Math.random() * target.length));
       var pos = target.position();
-      newItem.hide().css({ left: pos.left, top: pos.top }).insertAfter(target).fadeIn(this.slowAnimSpeed);
+      newItem.hide().css({ left: pos.left, top: pos.top })
+        .insertAfter(target)
+        .fadeIn(this.slowAnimSpeed);
       target.fadeOut(this.slowAnimSpeed, function() {
         $(this).remove();
       });
