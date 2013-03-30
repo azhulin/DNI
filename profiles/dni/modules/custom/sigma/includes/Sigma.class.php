@@ -12,7 +12,6 @@ class Sigma {
   private $client_secret;
   private $node_host;
   private $node_port;
-  private $access_key;
 
 
   /**
@@ -24,7 +23,6 @@ class Sigma {
     $this->client_secret = variable_get('sigma_client_secret');
     $this->node_host = variable_get('sigma_server_host');
     $this->node_port = variable_get('sigma_server_port');
-    $this->access_key = variable_get('sigma_access_key');
   }
 
 
@@ -77,9 +75,6 @@ class Sigma {
     if (!$this->node_port) {
       $messages[] = t('Node server port is not defined.');
     }
-    if (!$this->access_key) {
-      $messages[] = t('Access key is not defined.');
-    }
     if (!$messages) {
       $args = array(
         DRUPAL_ROOT . '/' . drupal_get_path('module', 'sigma') . '/js/server/server.js',
@@ -88,7 +83,6 @@ class Sigma {
         'client_secret=' . $this->client_secret,
         'host=' . $this->node_host,
         'port=' . $this->node_port,
-        'access_key=' . $this->access_key,
       );
       $debug = variable_get('node_server_debug_mode', 0);
       $log_file = variable_get('node_server_log_file');

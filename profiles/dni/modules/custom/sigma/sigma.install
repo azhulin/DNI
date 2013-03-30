@@ -23,7 +23,6 @@ function sigma_uninstall() {
     'sigma_client_secret',
     'sigma_server_host',
     'sigma_server_port',
-    'sigma_access_key',
   );
 
   foreach ($variables as $variable) {

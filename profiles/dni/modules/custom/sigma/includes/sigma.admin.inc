@@ -61,17 +61,6 @@ function sigma_settings_form() {
     '#required' => TRUE,
   );
 
-  $form['server']['access_key'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Access key'),
-    '#description' => t('Access key is used to generate access tokens'
-        . ' needed for secure communication with Node server.'),
-    '#default_value' => variable_get('sigma_access_key', md5($drupal_hash_salt)),
-    '#size' => 32,
-    '#maxlength' => 32,
-    '#required' => TRUE,
-  );
-
   $form['server']['server_submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save Server Settings'),
@@ -140,7 +129,7 @@ function sigma_settings_form() {
   $form['#attached']['js'] = array(
     drupal_get_path('module', 'sigma') . '/js/client/sigma_admin.js',
   );
-  
+
   sigma_prepare_js();
 
   return $form;
@@ -176,7 +165,7 @@ function sigma_settings_form_submit($form, &$form_state) {
       break;
 
     case 'Save Server Settings':
-      foreach (array('server_port', 'access_key') as $key) {
+      foreach (array('server_port') as $key) {
         variable_set('sigma_' . $key, trim(check_plain($form_state['values'][$key])));
       }
       drupal_set_message(t('Settings were successfully updated. Node server should be restarted.'));

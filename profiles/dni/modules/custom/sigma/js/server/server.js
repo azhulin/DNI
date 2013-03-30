@@ -2,14 +2,15 @@ var express = require('express')
   , querystring = require('querystring')
   , http = require('http')
   , https = require('https')
-  , url = require('url')
   , app = express()
   , server = http.createServer(app)
   , io = require('socket.io').listen(server, { log: false })
-  , Subscription = require('./subscription')
-  , subscription = new Subscription()
   , settings = require('./settings')
   , $ = require('./$')
+  , Storage = require('./storage')
+  , storage = new Storage({ limit: 64 })
+  , Subscription = require('./subscription')
+  , subscription = new Subscription(storage)
   ;
 
 http.globalAgent.maxSockets = 1000;
@@ -26,11 +27,8 @@ else {
 }
 
 global.subscriptions = {};
-var storageLimit = 64;
 var groups = [];
-var channels = {};
 var clients = {};
-var storage = {};
 var groupPermissions = {
   adminSettings: [ 'exit', 'getSubscription', 'postSubscription', 'deleteSubscription' ],
   widgetSettings: [ 'getSubscription' ],
@@ -48,7 +46,6 @@ function checkAccess(event, group) {
 
 
 io.sockets.on('connection', function(socket) {
-
   socket.on('disconnect', function() {
     if ('group' in socket) {
       clients[socket.group].splice(clients[socket.group].indexOf(socket), 1);
@@ -56,25 +53,21 @@ io.sockets.on('connection', function(socket) {
     }
   });
 
-  socket.emit('aOnline', { status: 'OK' });
-
   socket.on('qOnline', function(group, data) {
-    if (!(group in groupPermissions)) {
-      socket.disconnect();
-    }
-    else {
+    if (group in groupPermissions) {
       if ('client' === group) {
-        var subs = subscription.filter(Object.keys(data), socket);
+        var subs = subscription.filter(Object.keys(data), function(item) {
+          socket.emit('aBadSubscription', { id: item });
+        });
         !subs.length && socket.disconnect();
         subs.forEach(function(id) {
           socket.join(id);
           socket.emit('aUpdate', {
             id: id,
-            data: storage[id].slice(-data[id])
+            data: storage.pop(id, data[id])
           });
         });
       }
-
       socket.group = group;
       groups.pushU(group);
       if (!(group in clients)) {
@@ -84,6 +77,9 @@ io.sockets.on('connection', function(socket) {
         subscriptions: subs,
         info: socket.handshake
       });
+    }
+    else {
+      socket.disconnect();
     }
   });
 
@@ -123,6 +119,8 @@ io.sockets.on('connection', function(socket) {
       });
     }
   });
+
+  socket.emit('aOnline', { status: 'OK' });
 });
 
 process.on('SIGINT', function() {
@@ -143,30 +141,13 @@ app.get('/listen', function(req, res) {
 
 
 app.post('/listen', function(req, res) {
-  var data = '';
-  req.on('data', function(chunk) {
-    data += chunk;
-  });
-  req.on('end', function() {
-//log(req.headers['x-hub-signature']);
-//log(req.headers);
-    data = JSON.parse(data);
-    data.forEach(function(params) {
-      getUpdates(params, function(data) {
-        if (data) {
-          var id = params.subscription_id;
-          io.sockets.in(id).emit('aUpdate', {
-            id: id,
-            data: data
-          });
-        }
-      });
+  subscription.update(req, res, function(id, data) {
+    io.sockets.in(id).emit('aUpdate', {
+      id: id,
+      data: data
     });
   });
-
-  res.end();
 });
-
 
 
 subscription.get(function() {
@@ -179,7 +160,7 @@ subscription.get(function() {
       object: data.object,
       object_id: data.object_id
     };
-    getUpdates(params, function(data) {
+    subscription.getUpdate(params, function(data) {
       if (!--count) {
         server.listen(settings.port);
         io.sockets.in(id).emit('aUpdate', {
@@ -190,95 +171,3 @@ subscription.get(function() {
     });
   });
 });
-
-
-var updateInfo = {};
-
-function getUpdates(params, callback) {
-  var id = params.subscription_id;
-  if (id in updateInfo) {
-    var time = +new Date;
-    if (updateInfo[id].time + 2000 > time) {
-      //log('Skip ' + id);
-      return updateInfo[id].min_tag_id = false;
-    }
-    //log('Pass ' + id);
-    updateInfo[id].time = time;
-  }
-  else {
-    //log('New sub ' + id);
-    updateInfo[id] = {
-      time: +new Date,
-      min_tag_id: false
-    };
-  }
-
-  var query = {
-    client_id: settings.client_id
-  };
-  updateInfo[id].min_tag_id && (query.min_tag_id = updateInfo[id].min_tag_id);
-  var query = '?' + querystring.stringify(query);
-//https://api.instagram.com/v1/tags/drupaltest/media/recent?client_id=375c57455b054f8f9f349af431ca5a45
-  var options = {
-    host: 'api.instagram.com',
-    port: 443,
-    path: '/v1/tags/' + params.object_id + '/media/recent' + query,
-    method: 'GET'
-  };
-  var req = https.request(options, function(res) {
-    res.setEncoding('utf8');
-    var data = '';
-    res.on('data', function(chunk) {
-      data += chunk;
-    });
-    res.on('end', function() {
-      log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ' + res.headers['x-ratelimit-remaining'] + '/5000');
-      try {
-        data = JSON.parse(data);
-      }
-      catch(e) {
-        log('Parse error');
-        //log(data);
-        return false;
-      }
-      'min_tag_id' in data.pagination && (updateInfo[id].min_tag_id = data.pagination.min_tag_id);
-      storagePush(params, data.data, callback);
-    });
-  });
-  req.end();
-}
-
-
-var toDelete = [
-  'attribution', 'filter', 'location', 'type'
-];
-
-
-function storageProcessItem(item) {
-  toDelete.forEach(function(prop) {
-    delete item[prop];
-  });
-  item.caption = item.caption ? item.caption.text : '';
-  item.comments = item.comments.count;
-  item.images.low_resolution = item.images.low_resolution.url;
-  item.images.standard_resolution = item.images.standard_resolution.url;
-  item.images.thumbnail = item.images.thumbnail.url;
-  item.likes = item.likes.count;
-  item.user = item.user.username;
-  return item;
-}
-
-
-function storagePush(params, data, callback) {
-  //data = data.splice(-storageLimit, storageLimit);
-  var id = params.subscription_id;
-  !(id in storage) && (storage[id] = []);
-
-  data.reverse().forEach(function(item) {
-    item = storageProcessItem(item);
-    storageLimit < storage[id].length && storage[id].shift();
-    storage[id].push(item);
-  });
-  10 < data.length && (data = data.splice(-2, 2));
-  callback && callback(data);
-}

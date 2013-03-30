@@ -133,10 +133,9 @@
     var items = $('.sigma-content a', conf.target);
     var count = items.length;
     !conf.pos-- && (conf.pos = conf.rows - 1);
-    var x = -conf.size;
     var y = conf.pos * conf.size;
     var newItem = this.newItem(conf, item)
-      .css({ left: x, top: y });
+      .css({ left: -conf.size, top: y });
     conf.target.find('.sigma-content').append(newItem);
     !y && items.add(newItem).stop(true, true).animate({ left: '+=' + conf.size }, 'slow');
     (conf.columns + 1) * conf.rows + 1 === count && items.eq(0).remove();
@@ -148,9 +147,8 @@
     var count = items.length;
     !conf.pos-- && (conf.pos = conf.columns - 1);
     var x = conf.pos * conf.size;
-    var y = -conf.size;
     var newItem = this.newItem(conf, item)
-      .css({ left: x, top: y });
+      .css({ left: x, top: -conf.size });
     conf.target.find('.sigma-content').append(newItem);
     !x && items.add(newItem).stop(true, true).animate({ top: '+=' + conf.size }, 'slow');
     (conf.rows + 1) * conf.columns + 1 === count && items.eq(0).remove();
@@ -162,12 +160,10 @@
     var count = items.length;
     var newItem = this.newItem(conf, item);
     if (conf.columns * conf.rows > count) {
-      !conf.pos-- && (conf.pos = conf.columns - 1);
-      var x = conf.pos * conf.size;
-      var y = -conf.size;
-      newItem.css({ left: x, top: y });
-      conf.target.find('.sigma-content').append(newItem);
-      !x && items.add(newItem).stop(true, true).animate({ top: '+=' + conf.size }, 0);
+      var x = count % conf.columns * conf.size;
+      var y = Math.floor(count / conf.columns) * conf.size;
+      conf.target.find('.sigma-content')
+        .append(newItem.css({ left: x, top: y }));
     }
     else {
       var target = items.not(':animated');

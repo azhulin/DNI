@@ -8,7 +8,12 @@ var settings = require('./settings')
 module.exports = Subscription;
 
 
-function Subscription() {}
+function Subscription(storage) {
+  this.updateInfo = {};
+  this.storage = storage;
+  this.host = 'api.instagram.com';
+  this.subsPath = '/v1/subscriptions';
+}
 
 
 Subscription.prototype.post = function(object, object_id, callback) {
@@ -21,9 +26,9 @@ Subscription.prototype.post = function(object, object_id, callback) {
     callback_url: 'http://' + settings.host + ':' + settings.port + '/listen'
   });
   var options = {
-    host: 'api.instagram.com',
+    host: this.host,
     port: 443,
-    path: '/v1/subscriptions',
+    path: this.subsPath,
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -48,9 +53,9 @@ Subscription.prototype.get = function(callback) {
     client_id: settings.client_id
   });
   var options = {
-    host: 'api.instagram.com',
+    host: this.host,
     port: 443,
-    path: '/v1/subscriptions' + query,
+    path: this.subsPath + query,
     method: 'GET'
   };
   var req = https.request(options, function(res) {
@@ -60,13 +65,12 @@ Subscription.prototype.get = function(callback) {
       data += chunk;
     });
     res.on('end', function() {
-console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ' + res.headers['x-ratelimit-remaining'] + '/5000');
+      console.log('@@@@@@@@ ' + res.headers['x-ratelimit-remaining'] + '/5000');
       try {
         data = JSON.parse(data);
       }
       catch(e) {
         log('Parse error');
-        //log(data);
         return false;
       }
       var response = {};
@@ -106,9 +110,9 @@ Subscription.prototype.delete = function(type, param, callback) {
   query[type] = param;
   var query = '?' + querystring.stringify(query);
   var options = {
-    host: 'api.instagram.com',
+    host: this.host,
     port: 443,
-    path: '/v1/subscriptions' + query,
+    path: this.subsPath + query,
     method: 'DELETE'
   };
   var req = https.request(options, function(res) {
@@ -131,7 +135,78 @@ Subscription.prototype.confirm = function(req, res) {
 };
 
 
-Subscription.prototype.filter = function(subs, socket) {
+Subscription.prototype.update = function(req, res, callback) {
+  var self = this;
+  var data = '';
+  req.on('data', function(chunk) {
+    data += chunk;
+  });
+  req.on('end', function() {
+    data = JSON.parse(data);
+    data.forEach(function(params) {
+      self.getUpdate(params, function(data) {
+        if (data) {
+          var id = params.subscription_id;
+          callback && callback(id, data);
+        }
+      });
+    });
+  });
+  res.end();
+};
+
+
+Subscription.prototype.getUpdate = function(params, callback) {
+  var self = this;
+  var id = params.subscription_id;
+  if (id in this.updateInfo) {
+    var time = +new Date;
+    if (this.updateInfo[id].time + 2000 > time) {
+      return this.updateInfo[id].min_tag_id = false;
+    }
+    this.updateInfo[id].time = time;
+  }
+  else {
+    this.updateInfo[id] = {
+      time: +new Date,
+      min_tag_id: false
+    };
+  }
+  var query = {
+    client_id: settings.client_id
+  };
+  this.updateInfo[id].min_tag_id && (query.min_tag_id = this.updateInfo[id].min_tag_id);
+  var query = '?' + querystring.stringify(query);
+  var options = {
+    host: this.host,
+    port: 443,
+    path: '/v1/tags/' + params.object_id + '/media/recent' + query,
+    method: 'GET'
+  };
+  var req = https.request(options, function(res) {
+    res.setEncoding('utf8');
+    var data = '';
+    res.on('data', function(chunk) {
+      data += chunk;
+    });
+    res.on('end', function() {
+      console.log('@@@@@@@@ ' + res.headers['x-ratelimit-remaining'] + '/5000');
+      try {
+        data = JSON.parse(data);
+      }
+      catch(e) {
+        log('Parse error');
+        return false;
+      }
+      'min_tag_id' in data.pagination && (self.updateInfo[id].min_tag_id = data.pagination.min_tag_id);
+      self.storage.push(params, data.data, callback);
+    });
+  });
+  req.end();
+};
+
+
+Subscription.prototype.filter = function(subs, callback) {
   global.subscriptions;
   var filteredSubs = [];
   subs.forEach(function(item) {
@@ -139,7 +214,7 @@ Subscription.prototype.filter = function(subs, socket) {
       filteredSubs.pushU(item);
     }
     else {
-      socket.emit('aBadSubscription', { id: item });
+      callback && callback(item);
     }
   });
   return filteredSubs;
