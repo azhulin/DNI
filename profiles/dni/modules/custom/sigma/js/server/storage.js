@@ -1,5 +1,3 @@
-var settings = require('./settings');
-
 module.exports = Storage;
 
 
