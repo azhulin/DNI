@@ -48,3 +48,10 @@ Storage.prototype.pop = function(id, count) {
     return [];
   }
 };
+
+
+Storage.prototype.clear = function(id) {
+  if (id in this.data) {
+    this.data[id] = [];
+  }
+};

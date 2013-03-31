@@ -116,16 +116,19 @@
   AdminSettingsController.prototype.buildSubsList = function(data) {
     var self = this;
     $('tr:gt(0)', self.el.subsList).remove();
-    $.each(data.data, function(i, item) {
+    var i = 0;
+    Object.keys(data).forEach(function(id) {
+      var item = data[id];
       var row = self.el.row.clone();
-      $('td:eq(0)', row).text(item.id);
-      $('td:eq(1)', row).text(item.type.charAt(0).toUpperCase() + item.type.slice(1));
-      $('td:eq(2)', row).text('#' + item.object);
-      $('td:eq(3) a', row).click(function() {
+      $('td:eq(0)', row).text(id);
+      $('td:eq(1)', row).text(item.object.charAt(0).toUpperCase() + item.object.slice(1));
+      $('td:eq(2)', row).text('#' + item.object_id);
+      $('td:eq(3)', row).text(item.moderated ? Drupal.t('Yes') : Drupal.t('No'));
+      $('td:eq(4) a', row).click(function() {
         self.sigma.deleteSubscription(item.id);
         return false;
       });
-      row.addClass(i % 2 ? 'even' : 'odd').appendTo(self.el.subsList);
+      row.addClass(i++ % 2 ? 'even' : 'odd').appendTo(self.el.subsList);
     });
   };
 

@@ -156,9 +156,10 @@ function sigma_ig_widget_content_type_subscription_list() {
       t('Subscription ID'),
       t('Type'),
       t('Tag'),
+      t('Moderated'),
     ),
     'rows' => array(
-      array('<input type="radio" name="subscription_id"/>', '', '', ''),
+      array('<input type="radio" name="subscription_id"/>', '', '', '', ''),
     ),
     'attributes' => array('id' => 'subscription-list'),
   );

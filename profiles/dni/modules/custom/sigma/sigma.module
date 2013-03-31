@@ -52,7 +52,7 @@ function sigma_menu() {
   );
 
   $items['admin/config/services/sigma/clients'] = array(
-    'title' => 'Online Clients',
+    'title' => 'Clients',
     'description' => t('List of online clients.'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('sigma_clients_form'),
@@ -61,6 +61,18 @@ function sigma_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/sigma.admin.inc',
     'weight' => 1,
+  );
+
+  $items['admin/config/services/sigma/moderation'] = array(
+    'title' => 'Moderation',
+    'description' => t('Moderation interface.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sigma_moderation_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer sigma instagram'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/sigma.admin.inc',
+    'weight' => 2,
   );
 
   return $items;

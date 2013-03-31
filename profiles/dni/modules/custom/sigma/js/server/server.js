@@ -22,6 +22,7 @@ var groupPermissions = {
   adminSettings: [ 'exit', 'getSubscription', 'postSubscription', 'deleteSubscription' ],
   adminClients: [ 'getClient' ],
   widgetSettings: [ 'getSubscription' ],
+  moderator: [ 'moderateSubscription' ],
   client: []
 };
 
@@ -35,13 +36,6 @@ function checkAccess(event, group) {
 
 
 io.sockets.on('connection', function(socket) {
-  socket.on('disconnect', function() {
-    if ('group' in socket) {
-      client.delete(socket.id, socket.group);
-      io.sockets.in('adminClients').emit('aGetClient', client.get());
-    }
-  });
-
   socket.on('qOnline', function(group, data) {
     if (group in groupPermissions) {
       socket.group = group;
@@ -51,7 +45,9 @@ io.sockets.on('connection', function(socket) {
       switch (group) {
         case 'adminSettings':
         case 'widgetSettings':
-          subscription.get(function(data) {
+        case 'moderator':
+          socket.join('subscriptions');
+          subscription.getAll(function(data) {
             socket.emit('aGetSubscription', data);
           });
           break;
@@ -95,7 +91,7 @@ io.sockets.on('connection', function(socket) {
     if (checkAccess('postSubscription', socket.group)) {
       subscription.post(data.object, data.object_id, function() {
         subscription.get(function(data) {
-          io.sockets.emit('aGetSubscription', data);
+          io.sockets.in('subscriptions').emit('aGetSubscription', data);
         });
         socket.emit('aPostSubscription', { status: 'OK' });
       });
@@ -106,10 +102,27 @@ io.sockets.on('connection', function(socket) {
     if (checkAccess('deleteSubscription', socket.group)) {
       subscription.delete(data.type, data.param, function() {
         subscription.get(function(data) {
-          io.sockets.emit('aGetSubscription', data);
+          io.sockets.in('subscriptions').emit('aGetSubscription', data);
         });
         io.sockets.emit('aDeleteSubscription', { id: data.param });
       });
+    }
+  });
+
+  socket.on('qModerateSubscription', function(id) {
+    if (checkAccess('moderateSubscription', socket.group)) {
+      socket.join(id + 'm');
+      //socket.leave(id + ':moderate');
+      subscription.moderate(id, function(data) {
+        io.sockets.in('subscriptions').emit('aGetSubscription', data);
+      });
+    }
+  });
+
+  socket.on('disconnect', function() {
+    if ('group' in socket) {
+      client.delete(socket.id, socket.group);
+      io.sockets.in('adminClients').emit('aGetClient', client.get());
     }
   });
 
@@ -135,7 +148,8 @@ app.get('/listen', function(req, res) {
 
 app.post('/listen', function(req, res) {
   subscription.update(req, res, function(id, data) {
-    io.sockets.in(id).emit('aUpdate', {
+    var group = subscription.isModerated(id) ? id + 'm' : id;
+    io.sockets.in(group).emit('aUpdate', {
       id: id,
       data: data
     });
@@ -153,7 +167,7 @@ subscription.get(function() {
       object: data.object,
       object_id: data.object_id
     };
-    subscription.getUpdate(params, function(data) {
+    subscription.getUpdate(params, function() {
       if (!--count) {
         server.listen(settings.port);
       }

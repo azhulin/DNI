@@ -5,6 +5,7 @@
       adminSettings: Drupal.t('Settings Admin'),
       adminClients: Drupal.t('Client Admin'),
       widgetSettings: Drupal.t('Widget Admin'),
+      moderator: Drupal.t('Moderator'),
       client: Drupal.t('Client')
     };
     this.list = $('#client-list');

@@ -172,7 +172,7 @@ function sigma_settings_form_submit($form, &$form_state) {
 
 
 /**
- * Renders subscription list table.
+ * Renders subscription list table for settings page.
  */
 function sigma_settings_form_subscription_list() {
   $vars = array(
@@ -180,10 +180,11 @@ function sigma_settings_form_subscription_list() {
       t('Subscription ID'),
       t('Type'),
       t('Tag'),
+      t('Moderated'),
       t('Action'),
     ),
     'rows' => array(
-      array('', '', '', l(t('Delete'), '', array('attributes' => array('class' => 'button'))))
+      array('', '', '', '', l(t('Delete'), '', array('attributes' => array('class' => 'button'))))
     ),
     'attributes' => array('id' => 'subscription-list'),
   );
@@ -229,6 +230,49 @@ function sigma_clients_form_client_list() {
       array('', '', '', '', '')
     ),
     'attributes' => array('id' => 'client-list'),
+  );
+  $content = theme('table', $vars);
+
+  return $content;
+}
+
+
+/**
+ * Form constructor for moderation form.
+ */
+function sigma_moderation_form() {
+  $form = array();
+
+  $form += sigma_render_status();
+
+  $form['subscriptions'] = array(
+    '#markup' => sigma_moderation_form_subscription_list(),
+  );
+
+  sigma_prepare_js();
+  ctools_add_js('sigma_moderation.admin', 'sigma', 'js/client');
+  ctools_add_css('sigma.admin', 'sigma', 'css');
+
+  return $form;
+}
+
+
+/**
+ * Renders subscription list table for moderation page.
+ */
+function sigma_moderation_form_subscription_list() {
+  $vars = array(
+    'header' => array(
+      t('Subscription ID'),
+      t('Type'),
+      t('Tag'),
+      t('Moderated'),
+      t('Action'),
+    ),
+    'rows' => array(
+      array('', '', '', '', l(t('Moderate'), '', array('attributes' => array('class' => 'button'))))
+    ),
+    'attributes' => array('id' => 'subscription-list'),
   );
   $content = theme('table', $vars);
 

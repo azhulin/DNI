@@ -2,6 +2,7 @@ var settings = require('./settings')
   , querystring = require('querystring')
   , https = require('https')
   , url = require('url')
+  , $ = require('./$')
   ;
 
 
@@ -13,7 +14,8 @@ function Subscription(storage) {
   this.storage = storage;
   this.host = 'api.instagram.com';
   this.subsPath = '/v1/subscriptions';
-  this.subscriptions = {};
+  this.subscriptions = false;
+  this.moderated = [];
 }
 
 
@@ -74,29 +76,19 @@ Subscription.prototype.get = function(callback) {
         console.log('Parse error');
         return false;
       }
-      var response = {};
-      if (200 !== data.meta.code) {
-        response.status = 'error';
-        response.meta = data.meta;
-      }
-      else {
-        response.status = 'OK';
-        response.data = [];
-        var subs = {};
+      var subs = false;
+      if (200 === data.meta.code) {
+        subs = {};
         data.data.forEach(function(item) {
           subs[item.id] = {
             object: item.object,
-            object_id: item.object_id
+            object_id: item.object_id,
+            moderated: self.isModerated(item.id)
           };
-          response.data.push({
-            type: item.object,
-            object: item.object_id,
-            id: item.id
-          });
         });
         self.subscriptions = subs;
       }
-      callback && callback(response);
+      callback && callback(subs);
     });
   });
   req.end();
@@ -207,6 +199,16 @@ Subscription.prototype.getUpdate = function(params, callback) {
 };
 
 
+Subscription.prototype.getAll = function(callback) {
+  if (!this.subscriptions) {
+    this.get(callback);
+  }
+  else {
+    callback && callback(this.subscriptions);
+  }
+};
+
+
 Subscription.prototype.getIds = function() {
   return Object.keys(this.subscriptions);
 };
@@ -234,4 +236,19 @@ Subscription.prototype.filter = function(subs, callback) {
     }
   });
   return filteredSubs;
+};
+
+
+Subscription.prototype.moderate = function(id, callback) {
+  if (!this.moderated.contains(id)) {
+    this.moderated.push(id);
+    id in this.subscriptions && (this.subscriptions[id].moderated = true);
+    this.storage.clear(id);
+    this.getAll(callback);
+  }
+};
+
+
+Subscription.prototype.isModerated = function(id) {
+  return this.moderated.contains('' + id);
 };

@@ -24,6 +24,9 @@ function Sigma(params) {
     widgetSettings: [
       'aOnline', 'aExit', 'aGetSubscription'
     ],
+    moderator: [
+     'aOnline', 'aExit', 'aGetSubscription', 'aUpdate'
+    ],
     client: [
       'aOnline', 'aExit', 'aBadSubscription', 'aUpdate'
     ]
@@ -67,6 +70,11 @@ Sigma.prototype.postSubscription = function(object, object_id) {
 
 Sigma.prototype.deleteSubscription = function(id) {
   this.socket.emit('qDeleteSubscription', { type: 'id', param: id });
+};
+
+
+Sigma.prototype.moderateSubscription = function(id) {
+  this.socket.emit('qModerateSubscription', id);
 };
 
 
