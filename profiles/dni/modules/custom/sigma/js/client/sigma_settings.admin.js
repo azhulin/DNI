@@ -54,14 +54,11 @@
   AdminSettingsController.prototype.start = function() {
     var self = this;
     this.sigma.status.show();
-
     this.el.row = $('tr:last', this.subsList).attr('class', '').detach();
-
     this.el.stop.click(function() {
       self.sigma.exit();
       return false;
     });
-
     this.el.subsAdd.click(function() {
       $('#console').remove();
       $(this).hide();
@@ -94,15 +91,14 @@
 
   AdminSettingsController.prototype.isOnline = function() {
     this.sigma.online();
-    this.el.stop.show();
     this.el.start.hide();
+    this.el.stop.show();
   };
 
 
   AdminSettingsController.prototype.isOffline = function() {
     this.sigma.offline();
-    this.el.subs.hide();
-    this.el.stop.hide();
+    this.el.subs.add(this.el.stop).hide();
     this.el.start.show();
   };
 
@@ -123,7 +119,7 @@
       $('td:eq(0)', row).text(id);
       $('td:eq(1)', row).text(item.object.charAt(0).toUpperCase() + item.object.slice(1));
       $('td:eq(2)', row).text('#' + item.object_id);
-      $('td:eq(3)', row).text(item.moderated ? Drupal.t('Yes') : Drupal.t('No'));
+      $('td:eq(3)', row).text(Drupal.t(item.moderated ? 'Yes' : 'No'));
       $('td:eq(4) a', row).click(function() {
         self.sigma.deleteSubscription(item.id);
         return false;
@@ -134,7 +130,7 @@
 
 
   AdminSettingsController.prototype.informDeletion = function(data) {
-    this.setMessage(Drupal.t('Subscription "' + data.id + '" was deleted.'));
+    this.setMessage(Drupal.t('Subscription "@id" was deleted.', { '@id': data.id }));
   };
 
 
@@ -152,7 +148,8 @@
     $('#console').remove();
     type = type || 'status';
     $('<div class="clearfix" id="console"><div class="messages ' + type + '">'
-      + message + '</div></div>').insertBefore('#content .region.region-content');
+        + message + '</div></div>')
+      .insertBefore('#content .region.region-content');
   };
 
 

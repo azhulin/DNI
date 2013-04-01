@@ -103,7 +103,7 @@ function sigma_render_status() {
     '#type' => 'item',
     '#title' => t('Server status'),
     '#markup' => '<span class="server-status server-status-off">' . t('Offline') . '</span>'
-      . '<span class="server-status server-status-on">' . t('Online') . '</span>'
+        . '<span class="server-status server-status-on">' . t('Online') . '</span>'
     ),
   );
 

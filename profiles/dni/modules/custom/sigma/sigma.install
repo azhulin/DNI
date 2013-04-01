@@ -10,7 +10,6 @@ function sigma_uninstall() {
     'sigma_client_secret',
     'sigma_server_port',
   );
-
   foreach ($variables as $variable) {
     variable_del($variable);
   }

@@ -93,14 +93,18 @@
   position: absolute;
 }
 
-.sigma-widget .sigma-content .sigma-image.accepted {
-  border: 9px solid #0F7;
+.sigma-widget .sigma-content .sigma-image.accepted,
+.sigma-widget .sigma-content .sigma-image.featured {
+  border: 9px solid;
   margin: 1px;
 }
 
+.sigma-widget .sigma-content .sigma-image.accepted {
+  border-color: #0F7;
+}
+
 .sigma-widget .sigma-content .sigma-image.featured {
-  border: 9px solid #07F;
-  margin: 1px;
+  border-color: #07F;
 }
 
 .sigma-widget .sigma-content .sigma-image.accepted img,

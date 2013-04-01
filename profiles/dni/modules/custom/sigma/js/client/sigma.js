@@ -1,14 +1,12 @@
 function Sigma(params) {
-  var callbacks = params.callbacks;
-  var group = params.group;
-  var subscriptions = 'subscriptions' in params ? params.subscriptions : {};
-
   if (!('sigma' in Drupal.settings) || !('host' in Drupal.settings.sigma)) {
     return;
   }
-  this.socket = io.connect(Drupal.settings.sigma.host);
-
   var self = this;
+  var group = 'group' in params ? params.group : '';
+  var callbacks = 'callbacks' in params ? params.callbacks : {};
+  var subscriptions = 'subscriptions' in params ? params.subscriptions : {};
+  this.socket = io.connect(Drupal.settings.sigma.host);
 
   this.socket.on('aOnline', function() {
     self.socket.emit('qOnline', group, subscriptions);
@@ -64,12 +62,18 @@ Sigma.prototype.exit = function() {
 
 
 Sigma.prototype.postSubscription = function(object, object_id) {
-  this.socket.emit('qPostSubscription', { object: object, object_id: object_id });
+  this.socket.emit('qPostSubscription', {
+    object: object,
+    object_id: object_id
+  });
 };
 
 
 Sigma.prototype.deleteSubscription = function(id) {
-  this.socket.emit('qDeleteSubscription', { type: 'id', param: id });
+  this.socket.emit('qDeleteSubscription', {
+    type: 'id',
+    param: id
+  });
 };
 
 

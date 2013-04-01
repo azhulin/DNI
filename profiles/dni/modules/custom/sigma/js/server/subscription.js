@@ -68,9 +68,9 @@ Subscription.prototype.get = function(callback) {
       data += chunk;
     });
     res.on('end', function() {
-      console.log('@@@@@@@@ ' + res.headers['x-ratelimit-remaining'] + '/5000');
       try {
         data = JSON.parse(data);
+        console.log(res.headers['x-ratelimit-remaining'] + '/5000');
       }
       catch(e) {
         console.log('Parse error');
@@ -183,9 +183,9 @@ Subscription.prototype.getUpdate = function(params, callback) {
       data += chunk;
     });
     res.on('end', function() {
-      console.log('@@@@@@@@ ' + res.headers['x-ratelimit-remaining'] + '/5000');
       try {
         data = JSON.parse(data);
+        console.log(res.headers['x-ratelimit-remaining'] + '/5000');
       }
       catch(e) {
         console.log('Parse error');

@@ -1,9 +1,6 @@
 <?php
 
 
-/**
- *
- */
 class Sigma {
 
   private static $instance;
@@ -14,9 +11,6 @@ class Sigma {
   private $node_port;
 
 
-  /**
-   *
-   */
   private function __construct() {
     global $base_root;
 
@@ -28,9 +22,6 @@ class Sigma {
   }
 
 
-  /**
-   *
-   */
   public static function getInstance() {
     if (empty(self::$instance)) {
       self::$instance = new Sigma();
@@ -39,9 +30,6 @@ class Sigma {
   }
 
 
-  /**
-   *
-   */
   public function send_node_server_url() {
     if ($this->node_host && $this->node_port) {
       $settings = array(
@@ -54,22 +42,13 @@ class Sigma {
   }
 
 
-  /**
-   *
-   */
   public function start_node_server() {
     $messages = array();
-    if (!$this->drupal_url) {
-      $messages[] = t('Drupal URL is not defined.');
-    }
     if (!$this->client_id) {
       $messages[] = t('Client ID is not defined.');
     }
     if (!$this->client_secret) {
       $messages[] = t('Client Secret is not defined.');
-    }
-    if (!$this->node_host) {
-      $messages[] = t('Node server host is not defined.');
     }
     if (!$this->node_port) {
       $messages[] = t('Node server port is not defined.');

@@ -9,7 +9,6 @@
         size: 150,
         columns: 3,
         rows: 4,
-        animation: 'vertical',
         pos: 3
       },
       accepted: {
@@ -92,11 +91,6 @@
 
 
   AdminModerationController.prototype.refreshList = function(data) {
-    this.buildList(data);
-  };
-
-
-  AdminModerationController.prototype.buildList = function(data) {
     var self = this;
     $('tr:gt(0)', self.el.subsList).remove();
     var i = 0;
@@ -106,7 +100,7 @@
       $('td:eq(0)', row).text(id);
       $('td:eq(1)', row).text(item.object.charAt(0).toUpperCase() + item.object.slice(1));
       $('td:eq(2)', row).text('#' + item.object_id);
-      $('td:eq(3)', row).text(item.moderated ? Drupal.t('Yes') : Drupal.t('No'));
+      $('td:eq(3)', row).text(Drupal.t(item.moderated ? 'Yes' : 'No'));
       $('td:eq(4) a', row).click(function() {
         self.el.subsList.hide();
         self.el.stop.add(self.el.moderation).show();
@@ -131,11 +125,10 @@
 
   AdminModerationController.prototype.newItem = function(conf, item) {
     var self = this;
-    var src = item.images.thumbnail;
     var newItem = $('<a href="' + item.link + '" class="sigma-image" target="_blank">'
-        + '<img width="' + conf.size + '" height="' + conf.size + '" src="' + src + '"/></a>')
+        + '<img width="' + conf.size + '" height="' + conf.size
+        + '" src="' + item.images.thumbnail + '"/></a>')
       .mousedown(function(e) {
-        e.preventDefault();
         switch (e.which) {
           case 1:
             self.moderated($(this), item, false);

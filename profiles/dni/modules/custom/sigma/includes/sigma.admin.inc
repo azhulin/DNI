@@ -53,7 +53,7 @@ function sigma_settings_form() {
   $form['server']['server_port'] = array(
     '#type' => 'textfield',
     '#title' => t('Node server port'),
-    '#default_value' => variable_get('sigma_server_port', 80),
+    '#default_value' => variable_get('sigma_server_port', ''),
     '#size' => 4,
     '#maxlength' => 4,
     '#required' => TRUE,
