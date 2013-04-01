@@ -20,12 +20,14 @@ Module provides following interfaces:
   - List of online client (admin/config/services/sigma/clients).
   - Moderation interface (admin/config/services/sigma/moderation).
 
+All interfaces are interactive. That is, any changes made by one client will be sent to all other clients immediately.
+
 Module provides Instagram widget, implemented as a CTools content type (located at Widgets -> Instagram).
 
 Widget has following settings:
   - Subscription ID;
-  - Image size (depending on image size, image with appropriate resolution will be used;
-    e.g thumbnail 150x150, low_resolution 306x306, standard_resolution 612x612);
+  - Image size. Depending on image size, image with appropriate resolution will be used, e.g thumbnail (150x150),
+    low_resolution (306x306), standard_resolution (612x612);
   - Number of image columns;
   - Number of image rows;
   - Animation type (horizontal, vertical, random);
