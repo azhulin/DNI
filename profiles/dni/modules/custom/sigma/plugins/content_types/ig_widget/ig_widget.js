@@ -164,13 +164,15 @@
     else {
       var target = items.not(':animated');
       target = target.eq(Math.floor(Math.random() * target.length));
-      var pos = target.position();
-      newItem.hide().css({ left: pos.left, top: pos.top })
-        .insertAfter(target)
-        .fadeIn(this.slowAnimSpeed);
-      target.fadeOut(this.slowAnimSpeed, function() {
-        $(this).remove();
-      });
+      if (target.length) {
+        var pos = target.position();
+        newItem.hide().css({ left: pos.left, top: pos.top })
+          .insertAfter(target)
+          .fadeIn(this.slowAnimSpeed);
+        target.fadeOut(this.slowAnimSpeed, function() {
+          $(this).remove();
+        });
+      }
     }
   };
 
