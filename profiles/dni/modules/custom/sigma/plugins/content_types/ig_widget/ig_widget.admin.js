@@ -8,7 +8,7 @@
       object: $('#edit-object', this.context),
       subsContainer: $('#subscription-list-container', this.context),
       subsList: $('#subscription-list', this.context),
-      submit: $('input.form-submit', this.context),
+      submit: $('input.form-submit, a.close', this.context),
       modal: $('#modal-content', this.context),
       row: null
     };
@@ -51,6 +51,7 @@
       self.el.id.val(id);
       self.el.type.val(type);
       self.el.object.val(object);
+      self.sigma.disconnect();
     });
     this.el.row = $('tr:last', this.subsList).attr('class', '').detach();
   };
@@ -107,11 +108,14 @@
 
 
   $(function() {
-    initWidgetAdminController = function() {
-      var self = new WidgetAdminController();
-      self.init(self);
+    Drupal.behaviors.sigma = {
+      attach: function (context, settings) {
+        if ($('#sigma-ig-widget-content-type-edit-form').length) {
+          var self = new WidgetAdminController();
+          self.init(self);
+        }
+      }
     };
-    setTimeout(initWidgetAdminController, 1000);
   });
 
 })(jQuery);

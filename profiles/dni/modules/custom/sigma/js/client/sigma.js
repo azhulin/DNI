@@ -1,3 +1,5 @@
+var sigmaSocket = null;
+
 function Sigma(params) {
   if (!('sigma' in Drupal.settings) || !('host' in Drupal.settings.sigma)) {
     return;
@@ -6,7 +8,14 @@ function Sigma(params) {
   var group = 'group' in params ? params.group : '';
   var callbacks = 'callbacks' in params ? params.callbacks : {};
   var subscriptions = 'subscriptions' in params ? params.subscriptions : {};
-  this.socket = io.connect(Drupal.settings.sigma.host);
+
+  if (!sigmaSocket) {
+    sigmaSocket = io.connect(Drupal.settings.sigma.host);
+  }
+  else {
+    sigmaSocket.socket.reconnect();
+  }
+  this.socket = sigmaSocket;
 
   this.socket.on('aOnline', function() {
     self.socket.emit('qOnline', group, subscriptions);
@@ -53,6 +62,11 @@ Sigma.prototype.init = function() {
    else {
      return false;
    }
+};
+
+
+Sigma.prototype.disconnect = function() {
+  this.socket.disconnect();
 };
 
 
