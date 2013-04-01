@@ -243,7 +243,16 @@ Subscription.prototype.moderate = function(id, callback) {
   if (!this.moderated.contains(id)) {
     this.moderated.push(id);
     id in this.subscriptions && (this.subscriptions[id].moderated = true);
-    this.storage.clear(id);
+    this.getAll(callback);
+  }
+};
+
+
+Subscription.prototype.release = function(id, callback) {
+  id = '' + id;
+  if (this.moderated.contains(id)) {
+    this.moderated.splice(this.moderated.indexOf(id), 1);
+    id in this.subscriptions && (this.subscriptions[id].moderated = false);
     this.getAll(callback);
   }
 };

@@ -249,6 +249,34 @@ function sigma_moderation_form() {
     '#markup' => sigma_moderation_form_subscription_list(),
   );
 
+  $form['stop'] = array(
+    '#markup' => l(t('Stop Moderation'), '', array('attributes' => array(
+      'id' => 'stop-moderation',
+      'class' => 'button',
+    ))),
+  );
+
+  $form['moderation'] = array(
+    '#type' => 'fieldset',
+    '#title' => '',
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
+
+  $form['moderation']['new'] = array(
+    '#markup' => '<div class="sigma-widget sigma-new"><h3 class="title">'
+      . t('New') . '</h3><div class="sigma-content"></div><div class="description">'
+      . t('Left click to promote to "Accepted", right click to promote to "Featured".') . '</div></div>',
+  );
+  $form['moderation']['accepted'] = array(
+    '#markup' => '<div class="sigma-widget sigma-accepted"><h3 class="title">'
+      . t('Accepted') . '</h3><div class="sigma-content"></div></div>',
+  );
+  $form['moderation']['featured'] = array(
+    '#markup' => '<div class="sigma-widget sigma-featured"><h3 class="title">'
+      . t('Featured') . '</h3><div class="sigma-content"></div></div>',
+  );
+
   sigma_prepare_js();
   ctools_add_js('sigma_moderation.admin', 'sigma', 'js/client');
   ctools_add_css('sigma.admin', 'sigma', 'css');

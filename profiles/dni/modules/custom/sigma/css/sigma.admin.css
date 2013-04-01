@@ -28,3 +28,88 @@
   background-color: #0A0;
   display: none;
 }
+
+/**
+ * Moderation
+ */
+#stop-moderation {
+  display: none;
+}
+
+#edit-moderation {
+  display: none;
+  padding-top: 0;
+}
+
+#edit-moderation > div {
+  background-color: #E1E2DC;
+  overflow: hidden;
+  padding: 0;
+}
+
+.sigma-widget {
+  float: left;
+  padding: 0 32px;
+}
+
+.sigma-widget .title {
+  text-align: center;
+}
+
+.sigma-widget .sigma-content {
+  background-color: #EEE;
+  border: 4px solid #A6A7A2;
+  border-radius: 8px;
+  height: 600px;
+  overflow: hidden;
+  position: relative;
+}
+
+.sigma-widget.sigma-new {
+  width: 458px;
+}
+
+.sigma-widget.sigma-new .sigma-content {
+  width: 450px;
+}
+
+.sigma-widget.sigma-accepted {
+  width: 308px;
+}
+
+.sigma-widget.sigma-accepted .sigma-content {
+  width: 300px;
+}
+
+.sigma-widget.sigma-featured {
+  width: 158px;
+}
+
+.sigma-widget.sigma-featured .sigma-content {
+  width: 150px;
+}
+
+.sigma-widget .sigma-content .sigma-image {
+  position: absolute;
+}
+
+.sigma-widget .sigma-content .sigma-image.accepted {
+  border: 9px solid #0F7;
+  margin: 1px;
+}
+
+.sigma-widget .sigma-content .sigma-image.featured {
+  border: 9px solid #07F;
+  margin: 1px;
+}
+
+.sigma-widget .sigma-content .sigma-image.accepted img,
+.sigma-widget .sigma-content .sigma-image.featured img {
+  height: 130px;
+  opacity: .5;
+  width: 130px;
+}
+
+.sigma-widget .sigma-content .sigma-image img {
+  display: block;
+}

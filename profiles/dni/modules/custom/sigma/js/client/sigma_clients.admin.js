@@ -80,8 +80,7 @@
         $('td:eq(2)', row).text(item.path);
         $('td:eq(3)', row).text(item.userAgent);
         $('td:eq(4)', row).text(item.subscriptions.join(', '));
-        row.addClass(i++ % 2 ? 'even' : 'odd');
-        'client' === group ? row.appendTo(self.list) : row.prependTo(self.list);
+        row.addClass(i++ % 2 ? 'even' : 'odd').appendTo(self.list);
       });
     });
   };

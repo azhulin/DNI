@@ -78,6 +78,16 @@ Sigma.prototype.moderateSubscription = function(id) {
 };
 
 
+Sigma.prototype.moderateSubscriptionStop = function(id) {
+  this.socket.emit('qModerateSubscriptionStop', id);
+};
+
+
+Sigma.prototype.moderatedItem = function(id, item) {
+  this.socket.emit('qModeratedItem', id, item);
+};
+
+
 Sigma.prototype.online = function() {
   jQuery('.server-status', this.status).hide();
   jQuery('.server-status.server-status-on', this.status).show();

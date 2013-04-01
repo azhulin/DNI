@@ -18,10 +18,12 @@ class Sigma {
    *
    */
   private function __construct() {
-    $this->drupal_url = variable_get('sigma_drupal_url');
+    global $base_root;
+
+    $this->drupal_url = $base_root;
     $this->client_id = variable_get('sigma_client_id');
     $this->client_secret = variable_get('sigma_client_secret');
-    $this->node_host = variable_get('sigma_server_host');
+    $this->node_host = preg_replace(array('/^https?:\/\//', '/:[0-9]*$/'), '', $base_root);
     $this->node_port = variable_get('sigma_server_port');
   }
 

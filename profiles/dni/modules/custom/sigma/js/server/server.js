@@ -22,7 +22,7 @@ var groupPermissions = {
   adminSettings: [ 'exit', 'getSubscription', 'postSubscription', 'deleteSubscription' ],
   adminClients: [ 'getClient' ],
   widgetSettings: [ 'getSubscription' ],
-  moderator: [ 'moderateSubscription' ],
+  moderator: [ 'moderateSubscription', 'moderateSubscriptionStop', 'moderatedItem' ],
   client: []
 };
 
@@ -112,9 +112,26 @@ io.sockets.on('connection', function(socket) {
   socket.on('qModerateSubscription', function(id) {
     if (checkAccess('moderateSubscription', socket.group)) {
       socket.join(id + 'm');
-      //socket.leave(id + ':moderate');
       subscription.moderate(id, function(data) {
         io.sockets.in('subscriptions').emit('aGetSubscription', data);
+      });
+    }
+  });
+
+  socket.on('qModerateSubscriptionStop', function(id) {
+    if (checkAccess('moderateSubscriptionStop', socket.group)) {
+      socket.leave(id + 'm');
+      subscription.release(id, function(data) {
+        io.sockets.in('subscriptions').emit('aGetSubscription', data);
+      });
+    }
+  });
+
+  socket.on('qModeratedItem', function(id, item) {
+    if (checkAccess('moderatedItem', socket.group)) {
+      io.sockets.in(id).emit('aUpdate', {
+        id: id,
+        data: [item]
       });
     }
   });

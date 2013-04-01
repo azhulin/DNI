@@ -2,26 +2,12 @@
 
 
 /**
- * Implements hook_install().
- */
-function sigma_install() {
-  global $base_root;
-
-  variable_set('sigma_drupal_url', $base_root);
-  $node_host = preg_replace(array('/^https?:\/\//', '/:[0-9]*$/'), '', $base_root);
-  variable_set('sigma_node_host', $node_host);
-}
-
-
-/**
  * Implements hook_uninstall().
  */
 function sigma_uninstall() {
   $variables = array(
-    'sigma_drupal_url',
     'sigma_client_id',
     'sigma_client_secret',
-    'sigma_server_host',
     'sigma_server_port',
   );
 
