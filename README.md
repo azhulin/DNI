@@ -15,17 +15,17 @@ Module dependencies: ctools, page_manager, panels (included to installation prof
 Module should be configured after installation.
 
 Module provides following interfaces:
-  - General settings. Includes instagram client ID, instagram client secret, node server port,
-  managing subscriptions (admin/config/services/sigma).
+  - General settings. Includes instagram client ID, instagram client secret, node server port configuration,
+    managing subscriptions (admin/config/services/sigma).
   - List of online client (admin/config/services/sigma/clients).
   - Moderation interface (admin/config/services/sigma/moderation).
-  - 
+
 Module provides Instagram widget, implemented as a CTools content type (located at Widgets -> Instagram).
 
 Widget has following settings:
   - Subscription ID;
   - Image size (depending on image size, image with appropriate resolution will be used;
-  e.g thumbnail 150x150, low_resolution 306x306, standard_resolution 612x612);
+    e.g thumbnail 150x150, low_resolution 306x306, standard_resolution 612x612);
   - Number of image columns;
   - Number of image rows;
   - Animation type (horizontal, vertical, random);
