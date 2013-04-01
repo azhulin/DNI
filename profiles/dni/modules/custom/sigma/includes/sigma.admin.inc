@@ -44,12 +44,6 @@ function sigma_settings_form() {
     '#collapsed' => TRUE,
   );
 
-  $form['server']['server_host'] = array(
-    '#type' => 'item',
-    '#title' => t('Node server host'),
-    '#markup' => variable_get('sigma_server_host'),
-  );
-
   $form['server']['server_port'] = array(
     '#type' => 'textfield',
     '#title' => t('Node server port'),
