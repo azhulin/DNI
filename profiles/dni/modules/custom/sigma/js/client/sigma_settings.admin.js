@@ -121,7 +121,7 @@
       $('td:eq(2)', row).text('#' + item.object_id);
       $('td:eq(3)', row).text(Drupal.t(item.moderated ? 'Yes' : 'No'));
       $('td:eq(4) a', row).click(function() {
-        self.sigma.deleteSubscription(item.id);
+        self.sigma.deleteSubscription(id);
         return false;
       });
       row.addClass(i++ % 2 ? 'even' : 'odd').appendTo(self.el.subsList);
