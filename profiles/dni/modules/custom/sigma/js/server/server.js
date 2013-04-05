@@ -177,17 +177,22 @@ app.post('/listen', function(req, res) {
 subscription.get(function() {
   var ids = subscription.getIds();
   var count = ids.length;
-  ids.forEach(function(id) {
-    var data = subscription.getById(id);
-    var params = {
-      subscription_id: id,
-      object: data.object,
-      object_id: data.object_id
-    };
-    subscription.getUpdate(params, function() {
-      if (!--count) {
-        server.listen(settings.port);
-      }
+  if (count) {
+    ids.forEach(function(id) {
+      var data = subscription.getById(id);
+      var params = {
+        subscription_id: id,
+        object: data.object,
+        object_id: data.object_id
+      };
+      subscription.getUpdate(params, function() {
+        if (!--count) {
+          server.listen(settings.port);
+        }
+      });
     });
-  });
+  }
+  else {
+    server.listen(settings.port);
+  }
 });
